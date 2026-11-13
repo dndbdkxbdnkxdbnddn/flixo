@@ -1,0 +1,1497 @@
+<!doctype html><html lang="ar" dir="rtl" style="background:#0d1117"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0d1117"><style>:root{color-scheme:dark}html,body{background:#0d1117;margin:0}</style></head><body><title>FLIXO</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one centered column, preview stage first, filter strip under it, export last. Single dark look, the photo is the colour. */
+:root {
+  --bg: #0d1117;
+  --surface: #161c25;
+  --surface-2: #1f2733;
+  --line: #2a3442;
+  --fg: #eef2f6;
+  --muted: #92a0b1;
+  --accent: #ffb23f;
+  --accent-ink: #1a1203;
+  --danger: #ff6b6b;
+  --ok: #5fd39a;
+  --font: "Tajawal", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 18px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 0; display: flex; align-items: baseline; gap: 10px; }
+header h1 span { font-size: 13px; font-weight: 700; color: var(--accent-ink); background: var(--accent); padding: 1px 9px; border-radius: 6px; letter-spacing: .06em; }
+header h1 small.ver { font-size: 12px; font-weight: 500; color: var(--muted); background: none; padding: 0; letter-spacing: .02em; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 14px; text-wrap: balance; }
+
+button, select { font-family: inherit; font-size: 16px; color: inherit; }
+button { cursor: pointer; border: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.pick { display: flex; gap: 10px; align-items: center; }
+.btn { min-height: 48px; padding: 0 20px; border-radius: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:disabled { opacity: .5; cursor: default; }
+.btn-ghost { background: var(--surface-2); color: var(--fg); }
+.pick .btn-primary { flex: 1; }
+.hint { color: var(--muted); font-size: 13px; }
+
+.stage { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; place-items: center; min-height: 220px; }
+.stage canvas { display: block; max-width: 100%; max-height: 62vh; width: auto; height: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.badge { position: absolute; top: 10px; inset-inline-start: 10px; background: rgba(13,17,23,.78); color: var(--fg); font-size: 12px; padding: 3px 10px; border-radius: 999px; pointer-events: none; }
+.badge.orig { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+.player { display: flex; align-items: center; gap: 12px; }
+.player .btn { width: 48px; padding: 0; flex: none; }
+.player input[type=range] { flex: 1; min-width: 0; }
+.time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 84px; text-align: center; direction: ltr; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; height: 28px; background: transparent; accent-color: var(--accent); }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: var(--line); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); margin-top: -9px; border: 0; }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 4px; background: var(--line); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 0; }
+
+.section-label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+.section-label small { color: var(--muted); font-weight: 400; font-size: 13px; }
+
+.strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.chip { flex: none; width: 76px; background: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; scroll-snap-align: start; color: var(--muted); font-size: 13px; font-weight: 500; }
+.chip canvas { width: 72px; height: 72px; border-radius: 14px; border: 2px solid transparent; background: var(--surface-2); display: block; }
+.chip[aria-pressed="true"] { color: var(--fg); font-weight: 700; }
+.chip[aria-pressed="true"] canvas { border-color: var(--accent); }
+.chip span { text-align: center; line-height: 1.2; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.row label { font-weight: 500; }
+select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; min-height: 44px; padding: 0 12px; }
+.slider { display: flex; align-items: center; gap: 12px; }
+.slider input { flex: 1; min-width: 0; }
+.slider output { min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+.progress { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0%; background: var(--accent); border-radius: 999px; transition: width .3s linear; }
+.status { min-height: 22px; font-size: 14px; color: var(--muted); }
+.status.err { color: var(--danger); }
+.status.ok { color: var(--ok); }
+
+.result { display: flex; flex-direction: column; gap: 12px; }
+.result video, .result img { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 12px; background: #000; }
+.busy .strip, .busy .pick, .busy .player, .busy .opts { pointer-events: none; opacity: .45; }
+.note { font-size: 13px; color: var(--muted); border-inline-start: 3px solid var(--line); padding-inline-start: 10px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) { .progress i { transition: none; } }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; min-height: 40px; padding: 0 16px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-weight: 500; font-size: 15px; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.flabel { font-weight: 500; font-size: 15px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { min-height: 40px; padding: 0 14px; border-radius: 10px; background: var(--surface-2); color: var(--fg); font-size: 15px; font-weight: 500; }
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.estimate { margin: 0; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.estimate.err { color: var(--danger); }
+.busy .tabs { pointer-events: none; opacity: .45; }
+details.adjust summary { cursor: pointer; font-weight: 700; font-size: 16px; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 28px; }
+details.adjust summary::-webkit-details-marker { display: none; }
+details.adjust summary::after { content: '▾'; color: var(--muted); }
+details.adjust[open] summary::after { content: '▴'; }
+details.adjust summary small { color: var(--accent); font-weight: 500; margin-inline-start: 8px; }
+.adjlist { display: flex; flex-direction: column; gap: 2px; }
+.adjlist .slider label { min-width: 76px; font-size: 15px; }
+.adjlist .slider output { min-width: 40px; font-size: 13px; direction: ltr; unicode-bidi: isolate; }
+.combo { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.toggle { min-height: 40px; padding: 0 16px; border-radius: 999px; background: var(--surface-2); color: var(--fg); font-size: 15px; font-weight: 500; }
+.toggle[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.stackbox { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.stackrow { display: flex; align-items: center; gap: 10px; }
+.stackrow span { min-width: 96px; font-size: 14px; font-weight: 500; }
+.stackrow input { flex: 1; min-width: 0; }
+.stackrow button { min-height: 36px; width: 36px; border-radius: 10px; background: var(--surface-2); font-size: 16px; }
+.chip { position: relative; }
+.ord { position: absolute; top: 4px; inset-inline-end: 8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; font-style: normal; }
+.ord:empty { display: none; }
+.btn-danger { background: var(--danger); color: #1a0505; }
+.pick .btn-ghost { flex: none; }
+.busy .stackbox, .busy .combo, .busy details.adjust { pointer-events: none; opacity: .45; }
+.autorow { display: flex; gap: 10px; margin-top: 10px; }
+.autorow .btn-primary { flex: 1; }
+.autorow .btn-ghost { flex: none; }
+.busy #trimBox { pointer-events: none; opacity: .45; }
+#trimBox { margin-bottom: 16px; }
+.trim { position: relative; height: 44px; margin: 0 14px; touch-action: none; direction: rtl; cursor: pointer; }
+.trim .trk { position: absolute; left: 0; right: 0; top: 20px; height: 4px; border-radius: 4px; background: var(--line); }
+.trim .sel { position: absolute; top: 20px; height: 4px; background: var(--accent); }
+.trim .knob { position: absolute; top: 8px; width: 28px; height: 28px; margin-right: -14px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent); padding: 0; touch-action: none; }
+.trimtimes { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+.trimtimes b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.trimbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.trimbtns .btn { min-height: 40px; padding: 0 12px; font-size: 14px; flex: 1 1 auto; }
+details.adjust.panel { display: block; }
+details.adjust .adjlist { margin-top: 12px; }
+details.adjust #adjReset { margin-top: 12px; }
+.seg button { padding: 0 12px; font-size: 14px; }
+
+.ann { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, rgba(255,178,63,.14), var(--surface)); color: var(--fg); font: inherit; font-size: 14px; text-align: start; cursor: pointer; }
+.ann .whale { font-size: 20px; flex: none; }
+.ann b { color: var(--accent); font-weight: 800; }
+.ann .txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ann .chev { color: var(--muted); flex: none; }
+.by { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.by b { color: var(--accent); letter-spacing: .08em; }
+.sheet { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.6); }
+.sheet .card { width: min(640px, 100%); max-height: 82vh; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 18px 18px 0 0; padding: 18px 18px 28px; }
+.sheet h2 { margin: 0 0 4px; font-size: 20px; }
+.sheet .sub { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+.sheet .rel { border-top: 1px solid var(--line); padding: 12px 0; }
+.sheet .rel h3 { margin: 0 0 6px; font-size: 16px; display: flex; gap: 10px; align-items: baseline; }
+.sheet .rel h3 span { color: var(--muted); font-size: 12px; font-weight: 500; direction: ltr; unicode-bidi: isolate; }
+.sheet .rel h3 em { font-style: normal; direction: ltr; unicode-bidi: isolate; color: var(--accent); }
+.sheet ul { margin: 0; padding-inline-start: 20px; color: var(--fg); font-size: 14px; }
+.sheet li { margin: 3px 0; }
+.sheet .close { margin-top: 14px; width: 100%; }
+[hidden] { display: none !important; }
+</style>
+
+<main dir="rtl" lang="ar" id="app">
+  <button class="ann" id="upd" type="button" hidden><span class="whale" aria-hidden="true">🔄</span><span class="txt"></span></button>
+  <button class="ann" id="ann" type="button" aria-haspopup="dialog"><span class="whale" aria-hidden="true">🐳</span><span class="txt" id="annTxt"></span><span class="chev" aria-hidden="true">‹</span></button>
+  <header>
+    <h1>FLIXO<small class="ver" id="ver" dir="ltr">v1.0.0</small></h1>
+    <p class="by">by <b>HERO</b></p>
+    <p>49 فلتر سينمائي مقسمة 6 مجموعات، للصور والفيديو. الفيديو لحد 30 دقيقة، وكل شي يشتغل على جهازك بدون ما ينرفع لأي مكان.</p>
+  </header>
+
+  <div class="pick">
+    <button class="btn btn-primary" id="pickBtn" type="button">ارفع صورة أو فيديو</button>
+    <input class="sr" id="file" type="file" accept="image/*,video/*" tabindex="-1">
+    <button class="btn btn-ghost" id="delBtn" type="button" hidden>حذف</button>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite"></div>
+
+  <section>
+    <div class="stage" id="stage">
+      <canvas id="cv" width="960" height="640" aria-label="معاينة"></canvas>
+      <span class="badge" id="badge">صورة تجريبية</span>
+    </div>
+    <p class="hint" style="margin:8px 2px 0">اضغط مطوّلاً على الصورة لرؤية الأصل.</p>
+    <div class="autorow opts">
+      <button class="btn btn-primary" id="autoBtn" type="button">تعديل تلقائي</button>
+      <button class="btn btn-ghost" id="autoUndo" type="button" hidden>تراجع</button>
+    </div>
+    <p class="note" id="autoNote" style="margin-top:10px" hidden></p>
+  </section>
+
+  <div class="player opts" id="player" hidden>
+    <button class="btn btn-ghost" id="playBtn" type="button" aria-label="تشغيل">▶</button>
+    <input type="range" id="seek" min="0" max="1000" value="0" aria-label="مكان الفيديو">
+    <span class="time" id="time">0:00 / 0:00</span>
+  </div>
+
+  <section>
+    <div class="section-label">الفلاتر <small id="fname">الأصلي</small></div>
+    <div class="combo"><button type="button" class="toggle" id="combineBtn" aria-pressed="false">دمج أكثر من فلتر</button><span class="hint" id="combineHint"></span></div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="مجموعات الفلاتر"></div>
+    <div class="strip" id="strip" role="group" aria-label="الفلاتر"></div>
+    <div class="stackbox" id="stackBox" hidden></div>
+  </section>
+
+  <details class="panel adjust opts" id="adjBox">
+    <summary><span>تعديل الصورة<small id="adjCount"></small></span></summary>
+    <div class="adjlist" id="adjList"></div>
+    <button class="btn btn-ghost" id="adjReset" type="button">إعادة ضبط التعديلات</button>
+  </details>
+
+  <div class="panel">
+    <div class="slider opts">
+      <label for="amt">الشدة</label>
+      <input type="range" id="amt" min="0" max="100" value="100">
+      <output id="amtOut">100%</output>
+    </div>
+    <div class="opts" id="qVideo" hidden>
+      <div class="field" id="trimBox">
+        <div class="flabel">قص الفيديو <small class="hint" id="trimInfo"></small></div>
+        <div class="trim" id="trim">
+          <div class="trk"></div><div class="sel" id="trimSel"></div>
+          <button type="button" class="knob" id="knobA" role="slider" aria-label="بداية الفيديو" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0"></button>
+          <button type="button" class="knob" id="knobB" role="slider" aria-label="نهاية الفيديو" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="1000"></button>
+        </div>
+        <div class="trimtimes"><span>من <b id="trimAo">0:00</b></span><span>إلى <b id="trimBo">0:00</b></span></div>
+        <div class="trimbtns">
+          <button type="button" class="btn btn-ghost" id="trimSetA">ابدأ من هنا</button>
+          <button type="button" class="btn btn-ghost" id="trimSetB">انتهِ هنا</button>
+          <button type="button" class="btn btn-ghost" id="trimReset">الفيديو كله</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="flabel">دقة الفيديو</div>
+        <div class="seg" id="segVRes" role="radiogroup" aria-label="دقة الفيديو">
+          <button type="button" role="radio" data-v="0">الأصلية</button>
+          <button type="button" role="radio" data-v="720">720p</button>
+          <button type="button" role="radio" data-v="1080">1080p</button>
+          <button type="button" role="radio" data-v="1440">2K</button>
+          <button type="button" role="radio" data-v="2160">4K</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <div class="flabel">الفريمات بالثانية</div>
+        <div class="seg" id="segFps" role="radiogroup" aria-label="الفريمات">
+          <button type="button" role="radio" data-v="30">30</button>
+          <button type="button" role="radio" data-v="45">45</button>
+          <button type="button" role="radio" data-v="60">60</button>
+        </div>
+      </div>
+    </div>
+    <div class="opts" id="qImage" hidden>
+      <div class="field">
+        <div class="flabel">دقة الصورة</div>
+        <div class="seg" id="segIRes" role="radiogroup" aria-label="دقة الصورة">
+          <button type="button" role="radio" data-v="0">الأصلية</button>
+          <button type="button" role="radio" data-v="2560">2K</button>
+          <button type="button" role="radio" data-v="3840">4K</button>
+        </div>
+      </div>
+    </div>
+    <div class="field opts">
+      <div class="flabel">رفع الحدة</div>
+      <div class="seg" id="segSharp" role="radiogroup" aria-label="رفع الحدة">
+        <button type="button" role="radio" data-v="0">بدون</button>
+        <button type="button" role="radio" data-v="0.5">خفيف</button>
+        <button type="button" role="radio" data-v="1">قوي</button>
+      </div>
+    </div>
+    <p class="estimate" id="estimate"></p>
+    <p class="note" id="qNote" hidden></p>
+    <button class="btn btn-primary" id="exportBtn" type="button">طبّق الفلتر وحمّل</button>
+    <div id="prog" hidden>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="row" style="margin-top:8px">
+        <span class="hint" id="progTxt">0%</span>
+        <button class="btn btn-ghost" id="cancelBtn" type="button" style="min-height:40px">إلغاء</button>
+      </div>
+    </div>
+    <p class="note" id="vidNote" hidden>التصدير يعدّل سرعته حسب قوة جهازك: إذا جهازك بطيء يبطّئ التصدير بدل ما يقطّع الفيديو، فيطول الوقت بس النتيجة تطلع سلسة. اقصّ الفيديو لتقليل الوقت، وخلّي الصفحة مفتوحة والشاشة شغّالة لين يخلص.</p>
+  </div>
+
+  <div class="result" id="result" hidden></div>
+</main>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetT" dir="rtl">
+  <div class="card">
+    <h2 id="sheetT">🐳 شنو الجديد بـ FLIXO</h2>
+    <p class="sub">كل تحديث ينزل هنا بنفس الرابط، من HERO.</p>
+    <div id="relList"></div>
+    <button class="btn" id="sheetClose" type="button">تمام</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  /* FLIXO version: MAJOR.MINOR.PATCH. PATCH = bug fix, MINOR = new feature, MAJOR = big redesign. Bump here and in the #ver label. */
+  /* CHANGELOG: newest first. To release: add an entry on top (the version label and the top bar follow it). */
+  var CHANGELOG = [
+    { v: '1.2.0', d: '2026-11-13', title: 'تنبيه التحديث التلقائي', items: ['إذا نزل تحديث جديد، تطلع رسالة «يوجد تحديث جديد» بزر يحدّث الصفحة.', 'يفحص عند فتح الصفحة، وكل 5 دقايق، ولما ترجع للتبويب.'] },
+    { v: '1.1.1', d: '2026-11-13', title: 'فتح أسرع بدون وميض أبيض', items: ['الصفحة تفتح بخلفية غامقة من أول لحظة بدل شاشة بيضاء.'] },
+    { v: '1.1.0', d: '2026-11-13', title: 'شريط التحديثات واسم HERO', items: ['شريط فوق يعرض آخر تحديث، تضغط عليه تشوف كل التحديثات.', 'اسم HERO بالصفحة.', 'رقم الإصدار يتحدث مع كل تحديث.'] },
+    { v: '1.0.0', d: '2026-11-13', title: 'الإصدار الأول', items: ['49 فلتر سينمائي بـ 6 مجموعات، ودمج لحد 3 فلاتر.', 'تعديل الصورة (سطوع، ألوان، حدة...) وزر تعديل تلقائي.', 'دقة حتى 4K وفريمات 30 / 45 / 60.', 'قص الفيديو وتصدير سلس يعدّل سرعته حسب جهازك.', 'زر حذف لما ترفع ملف غلط.']}
+  ];
+  var APP_VERSION = CHANGELOG[0].v;
+  try {
+    document.getElementById('ver').textContent = 'v' + APP_VERSION;
+    document.getElementById('annTxt').innerHTML = '<b>جديد v' + APP_VERSION + '</b> · ' + CHANGELOG[0].title;
+    var rl = document.getElementById('relList');
+    CHANGELOG.forEach(function (r) {
+      var box = document.createElement('div'); box.className = 'rel';
+      var h = document.createElement('h3'), em = document.createElement('em'), sp = document.createElement('span');
+      em.textContent = 'v' + r.v; sp.textContent = r.d; h.appendChild(em); h.appendChild(document.createTextNode(r.title)); h.appendChild(sp);
+      var ul = document.createElement('ul'); r.items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      box.appendChild(h); box.appendChild(ul); rl.appendChild(box);
+    });
+    var sheet = document.getElementById('sheet');
+    function openSheet() { sheet.hidden = false; document.getElementById('sheetClose').focus(); }
+    function closeSheet() { sheet.hidden = true; document.getElementById('ann').focus(); }
+    document.getElementById('ann').addEventListener('click', openSheet);
+    document.getElementById('sheetClose').addEventListener('click', closeSheet);
+    sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+  } catch (e) {}
+  /* auto-update notice: only when served from a real web address that also serves version.json */
+  (function () {
+    if (!/^https?:$/.test(location.protocol)) return;
+    function cmp(a, b) { a = String(a).split('.'); b = String(b).split('.'); for (var i = 0; i < 3; i++) { var x = +a[i] || 0, y = +b[i] || 0; if (x !== y) return x > y ? 1 : -1; } return 0; }
+    var shown = false, bar = document.getElementById('upd');
+    function check() {
+      if (shown) return;
+      fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.version || shown || cmp(j.version, APP_VERSION) <= 0) return;
+        shown = true; bar.querySelector('.txt').innerHTML = '<b>يوجد تحديث جديد v' + j.version + '</b> · اضغط للتحديث'; bar.hidden = false;
+      }).catch(function () {});
+    }
+    bar.addEventListener('click', function () { location.reload(); });
+    check(); setInterval(check, 300000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+  })();
+  var MAX_SECONDS = 30 * 60;
+
+  /* ---------- the looks: 11 colour grades (WebGL, same code for preview, thumbnails and export) ---------- */
+  // slope/off/pow = per-channel curve, con = contrast, sat = saturation, fade = lifted blacks,
+  // sh/hi = tint pushed into shadows / highlights, vig = vignette
+  var GROUPS = [
+    { n: 1, name: 'دافئ وبني' },
+    { n: 2, name: 'ذهبي وغروب' },
+    { n: 3, name: 'أخضر وتيل' },
+    { n: 4, name: 'بارد وباهت' },
+    { n: 5, name: 'قوي ودرامي' },
+    { n: 6, name: 'عنبري وكلاسيكي' }
+  ];
+  var FILTERS = [
+    { id: 'none', name: 'الأصلي' },
+    /* 1: دافئ وبني */
+    { id: 'brown',  g: 1, name: 'بني داكن',  slope: [.96, .88, .76], pow: [1.10, 1.15, 1.20], con: 1.15, sat: .85, sh: [.02, .01, 0], hi: [.10, .07, .02], vig: .5 },
+    { id: 'wood',   g: 1, name: 'خشبي دافئ', slope: [1.0, .9, .76], pow: [1.12, 1.18, 1.25], con: 1.1, sat: .8, fade: .03, sh: [.02, .01, 0], hi: [.12, .08, 0], vig: .5 },
+    { id: 'enola',  g: 1, name: 'بني قديم',  slope: [1.02, .92, .72], pow: [1.15, 1.2, 1.25], con: 1.05, sat: .72, fade: .03, sh: [.01, .01, 0], hi: [.10, .07, 0], vig: .35 },
+    { id: 'copper', g: 1, name: 'نحاسي',     slope: [1.1, .95, .9], pow: [1.1, 1.15, 1.15], con: 1.12, sat: .9, sh: [.04, 0, .04], hi: [.18, .06, .05], vig: .45 },
+    { id: 'desert', g: 1, name: 'صحراوي',    slope: [1.05, 1.0, .9], pow: [1.1, 1.1, 1.1], con: 1.15, sat: .85, fade: .02, sh: [0, .02, .05], hi: [.16, .09, 0], vig: .4 },
+    { id: 'beige',  g: 1, name: 'بيج ناعم',  slope: [1.04, 1.0, .9], pow: [1.0, 1.0, 1.05], con: 1.03, sat: .65, fade: .05, sh: [.01, .01, 0], hi: [.12, .09, .03], vig: .25 },
+    /* 2: ذهبي وغروب */
+    { id: 'gold',    g: 2, name: 'ذهبي',       slope: [1.1, 1.0, .86], pow: [1.1, 1.1, 1.1], con: 1.18, sat: .95, sh: [0, .035, .03], hi: [.18, .10, 0], vig: .4 },
+    { id: 'raiders', g: 2, name: 'ذهبي قديم',  slope: [1.1, 1.0, .6], pow: [1.2, 1.2, 1.3], con: 1.2, sat: .45, sh: [.03, .02, 0], hi: [.40, .28, 0], vig: .5 },
+    { id: 'sunset',  g: 2, name: 'غروب',       slope: [1.18, .97, .74], pow: [1.1, 1.15, 1.2], con: 1.2, sat: 1.25, sh: [.05, 0, .02], hi: [.25, .10, 0], vig: .35 },
+    { id: 'sunset2', g: 2, name: 'غروب ظلال',  slope: [1.2, .95, .6], pow: [1.15, 1.2, 1.3], con: 1.3, sat: 1.3, sh: [0, .05, .02], hi: [.30, .14, 0], vig: .4 },
+    { id: 'autgold', g: 2, name: 'خريف ذهبي',  slope: [1.15, .97, .7], pow: [1.05, 1.1, 1.15], con: 1.15, sat: 1.35, fade: .03, sh: [.02, .02, 0], hi: [.14, .06, 0], vig: .3 },
+    { id: 'fire',    g: 2, name: 'ناري',       slope: [1.04, 1.0, .82], pow: [1.15, 1.10, 1.20], con: 1.2, sat: .85, sh: [0, .04, 0], hi: [.25, .10, 0], vig: .4 },
+    /* 3: أخضر وتيل */
+    { id: 'teal',    g: 3, name: 'تيل',          slope: [.78, 1.0, 1.02], pow: [1.15, 1.05, 1.05], con: 1.15, sat: .95, sh: [0, .05, .06], hi: [.30, .16, 0], vig: .4 },
+    { id: 'green',   g: 3, name: 'أخضر',         slope: [.85, 1.0, .95], pow: [1.12, 1.05, 1.1], con: 1.1, sat: .85, fade: .04, sh: [0, .05, .04], hi: [.14, .12, 0], vig: .3 },
+    { id: 'mint',    g: 3, name: 'نعناعي',       slope: [.92, 1.04, 1.0], con: 1.0, sat: .75, fade: .04, sh: [0, .03, .02], hi: [.02, .10, .08], vig: .2 },
+    { id: 'water',   g: 3, name: 'أخضر مائي',    slope: [.82, 1.0, 1.0], pow: [1.1, 1.0, 1.0], con: 1.1, sat: .8, fade: .02, sh: [0, .06, .06], hi: [0, .10, .09], vig: .4 },
+    { id: 'bridge',  g: 3, name: 'سماوي ناري',   slope: [1.08, 1.02, .9], pow: [1.05, 1.05, 1.05], con: 1.2, sat: 1.45, sh: [0, .06, .06], hi: [.24, .12, 0], vig: .2 },
+    { id: 'skycine', g: 3, name: 'سماء سينمائية', slope: [1.05, 1.0, .95], pow: [1.05, 1.05, 1.05], con: 1.2, sat: 1.2, sh: [0, .04, .07], hi: [.18, .09, 0], vig: .25 },
+    /* 4: بارد وباهت */
+    { id: 'coldgray', g: 4, name: 'رمادي بارد',  slope: [.92, .97, 1.05], pow: [1.2, 1.2, 1.15], con: 1.2, sat: .3, sh: [0, .02, .04], hi: [.04, .05, .06], vig: .5 },
+    { id: 'steel',    g: 4, name: 'رمادي حديدي', slope: [.9, 1.0, 1.05], pow: [1.15, 1.15, 1.15], con: 1.2, sat: .55, sh: [0, .03, .04], hi: [.10, .06, .04], vig: .4 },
+    { id: 'euphoria', g: 4, name: 'أزرق ناعم',   slope: [.85, .95, 1.1], pow: [1.05, 1.05, 1.0], con: 1.05, sat: .6, fade: .04, sh: [0, .03, .07], hi: [.03, .06, .10], vig: .25 },
+    { id: 'portrait', g: 4, name: 'بورتريه',     slope: [.93, 1.0, 1.04], pow: [1.1, 1.1, 1.1], con: 1.1, sat: .8, fade: .05, sh: [0, .03, .05], hi: [.02, .06, .05], vig: .35 },
+    { id: 'dusty',    g: 4, name: 'صحراء باهتة', slope: [1.0, .98, .92], pow: [1.05, 1.05, 1.05], con: 1.1, sat: .65, fade: .04, sh: [0, .02, .03], hi: [.10, .07, .02], vig: .3 },
+    { id: 'autumn',   g: 4, name: 'خريف باهت',   pow: [1.15, 1.15, 1.15], con: 1.08, sat: .7, fade: .05, sh: [0, .03, .03], hi: [.10, .05, 0], vig: .3 },
+    /* 5: قوي ودرامي */
+    { id: 'neon',  g: 5, name: 'نيون',        slope: [.92, .92, 1.2], pow: [1.1, 1.15, 1.0], con: 1.2, sat: 1.3, sh: [.02, .02, .10], hi: [.22, .04, .22], vig: .35 },
+    { id: 'blood', g: 5, name: 'أحمر دموي',   slope: [1.25, .7, .65], pow: [1.15, 1.3, 1.3], con: 1.25, sat: 1.1, sh: [.06, 0, 0], hi: [.25, .06, .03], vig: .6 },
+    { id: 'hdr',   g: 5, name: 'HDR حاد',     slope: [1.05, 1.05, 1.0], con: 1.25, sat: 1.3, shp: .6, vig: .1 },
+    { id: 'sport', g: 5, name: 'رياضي حيوي',  slope: [1.05, 1.0, 1.1], pow: [1.05, 1.05, 1.0], con: 1.25, sat: 1.3, sh: [0, .02, .08], hi: [.12, .04, 0], vig: .3 },
+    { id: 'city',  g: 5, name: 'مدينة',       slope: [1.05, 1.0, .95], pow: [1.1, 1.1, 1.1], con: 1.3, sat: 1.3, sh: [0, .05, .07], hi: [.28, .12, 0], vig: .3 },
+    { id: 'dark',  g: 5, name: 'داكن حاد',    slope: [1.0, .97, .95], pow: [1.2, 1.2, 1.2], con: 1.3, sat: .7, sh: [0, .02, .04], hi: [.08, .06, .03], vig: .6, shp: .4 },
+    /* new: 2 ذهبي وغروب */
+    { id: 'redhair', g: 2, name: 'برتقالي دافئ', slope: [1.08, .97, .8], pow: [1.1, 1.12, 1.15], con: 1.15, sat: 1.1, sh: [0, .02, .03], hi: [.12, .06, 0], vig: .4 },
+    { id: 'golden',  g: 2, name: 'ريفي ذهبي',    slope: [1.08, .98, .8], pow: [1.05, 1.1, 1.15], con: 1.1, sat: .85, fade: .03, sh: [0, .03, .01], hi: [.14, .08, 0], vig: .35 },
+    { id: 'juno',    g: 2, name: 'برتقالي زيتوني', slope: [1.1, .96, .72], pow: [1.08, 1.1, 1.2], con: 1.15, sat: 1.05, sh: [0, .03, 0], hi: [.16, .07, 0], vig: .3 },
+    /* new: 3 أخضر وتيل */
+    { id: 'sage',    g: 3, name: 'أخضر مريمية',  slope: [.9, 1.0, .9], pow: [1.05, 1.0, 1.08], con: 1.05, sat: .75, fade: .03, sh: [0, .03, .02], hi: [.06, .09, .04], vig: .35 },
+    { id: 'factory', g: 3, name: 'أخضر زيتوني',  slope: [.95, 1.0, .7], pow: [1.15, 1.1, 1.25], con: 1.1, sat: .8, fade: .02, sh: [0, .04, 0], hi: [.10, .12, 0], vig: .4 },
+    { id: 'monoteal', g: 3, name: 'تيل أحادي',   slope: [.65, 1.0, .95], pow: [1.2, 1.05, 1.05], con: 1.1, sat: .7, sh: [0, .06, .06], hi: [0, .10, .09], vig: .5 },
+    /* new: 4 بارد وباهت */
+    { id: 'train',    g: 4, name: 'قطار هادئ',   slope: [.92, 1.0, 1.0], pow: [1.1, 1.1, 1.1], con: 1.05, sat: .6, fade: .03, sh: [0, .03, .03], hi: [.05, .06, .05], vig: .3 },
+    { id: 'ship',     g: 4, name: 'بحر رمادي',   slope: [.85, 1.0, 1.02], pow: [1.15, 1.1, 1.1], con: 1.1, sat: .6, sh: [0, .04, .05], hi: [.02, .07, .07], vig: .45 },
+    { id: 'cliffs',   g: 4, name: 'غيوم رمادية', slope: [.96, 1.0, .97], pow: [1.2, 1.2, 1.2], con: 1.2, sat: .5, sh: [0, .02, .03], hi: [.05, .06, .05], vig: .5 },
+    { id: 'dressing', g: 4, name: 'بيج رمادي',   slope: [1.0, .98, .9], pow: [1.1, 1.1, 1.1], con: 1.08, sat: .65, fade: .04, sh: [.01, .01, 0], hi: [.08, .07, .03], vig: .35 },
+    /* new: 5 قوي ودرامي */
+    { id: 'nightblue', g: 5, name: 'ليل أزرق',      slope: [.8, .95, 1.15], pow: [1.2, 1.15, 1.05], con: 1.25, sat: 1.0, sh: [0, .03, .09], hi: [.10, .08, 0], vig: .55 },
+    { id: 'redteal',   g: 5, name: 'أحمر وتيل ليلي', slope: [1.05, .9, .9], pow: [1.25, 1.25, 1.2], con: 1.3, sat: 1.15, sh: [0, .05, .05], hi: [.20, .05, 0], vig: .6 },
+    { id: 'tropic',    g: 5, name: 'استوائي',       slope: [1.02, 1.04, .95], pow: [.98, .98, 1.0], con: 1.12, sat: 1.35, fade: .02, sh: [0, .02, 0], hi: [.08, .08, 0], vig: .15 },
+    { id: 'vivstreet', g: 5, name: 'شارع ملون',     slope: [1.08, 1.0, .88], pow: [1.0, 1.0, 1.02], con: 1.15, sat: 1.45, sh: [0, .03, .05], hi: [.12, .06, 0], vig: .15 },
+    /* new: 6 عنبري وكلاسيكي */
+    { id: 'cafe',      g: 6, name: 'كافيه دافئ',   slope: [1.05, .97, .78], pow: [1.1, 1.12, 1.18], con: 1.08, sat: .9, fade: .02, sh: [.01, .015, 0], hi: [.12, .08, 0], vig: .4 },
+    { id: 'godfather', g: 6, name: 'كلاسيكي بني',  slope: [1.1, .95, .6], pow: [1.15, 1.2, 1.3], con: 1.15, sat: .8, sh: [.03, .015, 0], hi: [.18, .12, 0], vig: .5 },
+    { id: 'amberroom', g: 6, name: 'كهرماني',      slope: [1.15, .98, .45], pow: [1.35, 1.4, 1.5], con: 1.2, sat: .7, sh: [.03, .02, 0], hi: [.20, .14, 0], vig: .6 },
+    { id: 'amberdark', g: 6, name: 'عنبر داكن',    slope: [1.1, .92, .55], pow: [1.3, 1.35, 1.5], con: 1.25, sat: .85, sh: [.02, .01, 0], hi: [.18, .10, 0], vig: .55 },
+    { id: 'inception', g: 6, name: 'ذهبي خشبي',    slope: [1.12, .95, .6], pow: [1.2, 1.25, 1.35], con: 1.25, sat: .95, sh: [.02, .01, 0], hi: [.20, .10, 0], vig: .5 }
+  ];
+
+  var VS = 'attribute vec2 p;varying vec2 v;void main(){v=vec2(.5+.5*p.x,.5-.5*p.y);gl_Position=vec4(p,0.,1.);}';
+  var FS = [
+    '#ifdef GL_FRAGMENT_PRECISION_HIGH', 'precision highp float;', '#else', 'precision mediump float;', '#endif',
+    'varying vec2 v;uniform sampler2D t,t2;',
+    'uniform vec3 uSlope[3],uPow[3],uSh[3],uHi[3];uniform vec4 uP[3];uniform vec3 uAmtL;',
+    'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed;uniform vec2 uTex;',
+    'float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}',
+    'vec3 S(vec2 p){vec3 a=texture2D(t,p).rgb;if(uMix>0.){a=mix(a,texture2D(t2,p).rgb,uMix);}return a;}',
+    'vec3 lk(vec3 o,vec3 sl,vec3 pw,vec3 sh,vec3 hi,vec4 p,float amt){',
+    ' if(amt<=0.)return o;',
+    ' vec3 c=pow(max(o*sl,0.),pw);',
+    ' c=(c-.5)*p.x+.5;float l=lum(c);c=mix(vec3(l),c,p.y);',
+    ' l=clamp(lum(c),0.,1.);c+=sh*(1.-l)*(1.-l)+hi*l*l*.6;c=c*(1.-p.z)+p.z;',
+    ' vec2 q=v-.5;q.x*=uAsp;c*=1.-p.w*smoothstep(.25,.85,length(q));',
+    ' return mix(o,clamp(c,0.,1.),amt);}',
+    'void main(){vec3 o=S(v);',
+    ' if(uSharp>0.){vec3 bl=(S(v+vec2(uTex.x,0.))+S(v-vec2(uTex.x,0.))+S(v+vec2(0.,uTex.y))+S(v-vec2(0.,uTex.y)))*.25;o=clamp(o+(o-bl)*uSharp,0.,1.);}',
+    ' vec3 c=o*exp2(uBri);c.r+=uTemp*.1;c.b-=uTemp*.1;c.g+=uTint*.08;c.r-=uTint*.04;c.b-=uTint*.04;',
+    ' float l=lum(c);c+=uShA*(1.-smoothstep(0.,.6,l))*.25+uHiA*smoothstep(.4,1.,l)*.25;',
+    ' c=(c-.5)*uCon2+.5;float l2=lum(c);c=mix(vec3(l2),c,uSat2);',
+    ' float sp=max(c.r,max(c.g,c.b))-min(c.r,min(c.g,c.b));c=mix(vec3(l2),c,1.+uVib*(1.-sp));',
+    ' c=clamp(c*(1.-uFadeA)+uFadeA,0.,1.);',
+    ' c=lk(c,uSlope[0],uPow[0],uSh[0],uHi[0],uP[0],uAmtL.x);',
+    ' c=lk(c,uSlope[1],uPow[1],uSh[1],uHi[1],uP[1],uAmtL.y);',
+    ' c=lk(c,uSlope[2],uPow[2],uSh[2],uHi[2],uP[2],uAmtL.z);',
+    ' vec2 q=v-.5;q.x*=uAsp;c*=1.-uVigA*smoothstep(.25,.85,length(q));',
+    ' float n=fract(sin(dot(floor(gl_FragCoord.xy/uGs)+uSeed,vec2(12.9898,78.233)))*43758.5453);',
+    ' c+=(n-.5)*uGrain*.35;',
+    ' gl_FragColor=vec4(clamp(c,0.,1.),1.);}'
+  ].join('\n');
+
+  function Renderer(canvas) {
+    var opt = { alpha: false, antialias: false, preserveDrawingBuffer: true };
+    var gl = canvas.getContext('webgl', opt) || canvas.getContext('experimental-webgl', opt);
+    if (!gl) throw new Error('no webgl');
+    function sh(type, src) {
+      var o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o);
+      if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o));
+      return o;
+    }
+    var pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(pr); gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    function mkTex() {
+      var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+      return t;
+    }
+    var texCur = mkTex(), texPrev = mkTex(), sw = 1, shh = 1;
+    gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 't2'), 1);
+    var U = {};
+    ['uSlope', 'uPow', 'uSh', 'uHi', 'uP'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n + '[0]'); });
+    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uTex'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+    this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    // upload = push a new source frame (the old one becomes "previous", used for frame blending)
+    this.upload = function (src) {
+      var tmp = texPrev; texPrev = texCur; texCur = tmp;
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texCur);
+      try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); } catch (e) { return false; }
+      sw = src.videoWidth || src.naturalWidth || src.width || 1; shh = src.videoHeight || src.naturalHeight || src.height || 1;
+      return true;
+    };
+    // stack = up to 3 looks [{f: look, a: 0..1}], ad = image adjustments
+    this.draw = function (stack, ad, w, h, sharp, mix) {
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
+      gl.viewport(0, 0, w, h);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texCur);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, texPrev);
+      stack = stack || []; ad = ad || {};
+      var sl = [], pw = [], sh2 = [], hi2 = [], pp = [], am = [0, 0, 0], shp = sharp || 0;
+      for (var i = 0; i < 3; i++) {
+        var st = stack[i], L = (st && st.f && st.f.id !== 'none') ? st.f : null;
+        [].push.apply(sl, (L && L.slope) || [1, 1, 1]); [].push.apply(pw, (L && L.pow) || [1, 1, 1]);
+        [].push.apply(sh2, (L && L.sh) || [0, 0, 0]); [].push.apply(hi2, (L && L.hi) || [0, 0, 0]);
+        pp.push((L && L.con) || 1, (L && L.sat != null) ? L.sat : 1, (L && L.fade) || 0, (L && L.vig) || 0);
+        if (L) { am[i] = st.a; shp += (L.shp || 0) * st.a; }
+      }
+      gl.uniform3fv(U.uSlope, new Float32Array(sl)); gl.uniform3fv(U.uPow, new Float32Array(pw));
+      gl.uniform3fv(U.uSh, new Float32Array(sh2)); gl.uniform3fv(U.uHi, new Float32Array(hi2));
+      gl.uniform4fv(U.uP, new Float32Array(pp)); gl.uniform3f(U.uAmtL, am[0], am[1], am[2]);
+      gl.uniform2f(U.uTex, 1 / sw, 1 / shh); gl.uniform1f(U.uSharp, shp); gl.uniform1f(U.uMix, mix || 0); gl.uniform1f(U.uAsp, w / h);
+      gl.uniform1f(U.uBri, ad.bri || 0); gl.uniform1f(U.uCon2, ad.con == null ? 1 : ad.con); gl.uniform1f(U.uSat2, ad.sat == null ? 1 : ad.sat);
+      gl.uniform1f(U.uVib, ad.vib || 0); gl.uniform1f(U.uTemp, ad.temp || 0); gl.uniform1f(U.uTint, ad.tint || 0);
+      gl.uniform1f(U.uHiA, ad.hi || 0); gl.uniform1f(U.uShA, ad.sh || 0); gl.uniform1f(U.uFadeA, ad.fade || 0);
+      gl.uniform1f(U.uVigA, ad.vig || 0); gl.uniform1f(U.uGrain, ad.grain || 0);
+      gl.uniform1f(U.uGs, Math.max(1, w / 1280)); gl.uniform1f(U.uSeed, Math.random() * 100);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+    this.render = function (src, stack, ad, w, h, sharp) { if (this.upload(src)) this.draw(stack, ad, w, h, sharp, 0); };
+    this.dispose = function () { var e = gl.getExtension('WEBGL_lose_context'); if (e) e.loseContext(); };
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cv = $('cv'), thumbCv = document.createElement('canvas');
+  thumbCv.width = 144; thumbCv.height = 144;
+  var R = null, T = null;
+  try { R = new Renderer(cv); T = new Renderer(thumbCv); } catch (e) { R = null; T = null; }
+
+  var state = { stack: [], combine: false, amount: 1, showOrig: false, media: null, exporting: false, cancelled: false };
+  var NOADJ = { bri: 0, con: 1, sat: 1, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
+  var adjRaw = { bri: 0, con: 0, sat: 0, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
+  var adj = NOADJ;
+  var trim = { a: 0, b: 1000 };
+  function computeAdj() {
+    var r = adjRaw;
+    adj = { bri: r.bri / 100 * .9, con: 1 + r.con / 100 * .6, sat: 1 + r.sat / 100, vib: r.vib / 100 * 1.2, temp: r.temp / 100, tint: r.tint / 100,
+            hi: r.hi / 100, sh: r.sh / 100, fade: r.fade / 100 * .25, vig: r.vig / 100 * .8, grain: r.grain / 100 };
+  }
+  function stackAmt() { return state.stack.map(function (x) { return { f: x.f, a: x.a * state.amount }; }); }
+  function stackName() { return state.stack.length ? state.stack.map(function (x) { return x.f.id; }).join('+') : 'original'; }
+  var urls = [];
+  var opts = { vres: 1080, fps: 30, ires: 0, sharp: 0 };
+
+  /* ---------- sample scene (shown until the user uploads) ---------- */
+  function makeSample() {
+    var c = document.createElement('canvas'); c.width = 960; c.height = 640;
+    var x = c.getContext('2d');
+    var g = x.createLinearGradient(0, 0, 0, 640);
+    g.addColorStop(0, '#3b6fd8'); g.addColorStop(.55, '#f4b183'); g.addColorStop(1, '#f7d9a6');
+    x.fillStyle = g; x.fillRect(0, 0, 960, 640);
+    x.fillStyle = '#fff3c4'; x.beginPath(); x.arc(690, 290, 74, 0, 6.3); x.fill();
+    x.fillStyle = '#2f6b4f'; x.beginPath(); x.moveTo(0, 430); x.quadraticCurveTo(220, 300, 470, 420); x.quadraticCurveTo(700, 330, 960, 410); x.lineTo(960, 640); x.lineTo(0, 640); x.fill();
+    x.fillStyle = '#1f4d3a'; x.beginPath(); x.moveTo(0, 520); x.quadraticCurveTo(300, 440, 600, 520); x.quadraticCurveTo(800, 470, 960, 510); x.lineTo(960, 640); x.lineTo(0, 640); x.fill();
+    x.fillStyle = '#1f8a9a'; x.fillRect(0, 585, 960, 55);
+    x.fillStyle = '#c8372d'; x.beginPath(); x.roundRect ? x.roundRect(380, 400, 110, 150, 40) : x.rect(380, 400, 110, 150); x.fill();
+    x.fillStyle = '#e0ac8a'; x.beginPath(); x.arc(435, 365, 46, 0, 6.3); x.fill();
+    x.fillStyle = '#2b1d16'; x.beginPath(); x.arc(435, 348, 46, 3.3, 6.1); x.fill();
+    var cols = ['#ffd23f', '#ff5d8f', '#ffffff', '#b388ff'];
+    for (var i = 0; i < 14; i++) { x.fillStyle = cols[i % 4]; x.beginPath(); x.arc(70 + i * 62, 560 + (i % 3) * 14, 9, 0, 6.3); x.fill(); }
+    return c;
+  }
+
+  /* ---------- UI helpers ---------- */
+  function say(t, cls) { var s = $('status'); s.textContent = t || ''; s.className = 'status' + (cls ? ' ' + cls : ''); }
+  function fmt(t) {
+    if (!isFinite(t)) return '0:00';
+    t = Math.max(0, Math.floor(t));
+    var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  }
+  function track(u) { urls.push(u); return u; }
+  function revokeAll() { urls.forEach(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} }); urls = []; }
+
+  /* ---------- filter strip ---------- */
+  var strip = $('strip'), chips = [], tabBtns = [];
+  FILTERS.forEach(function (f) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', f.id === 'none' ? 'true' : 'false');
+    var c = document.createElement('canvas'); c.width = 144; c.height = 144;
+    var s = document.createElement('span'); s.textContent = f.name;
+    b.appendChild(c); b.appendChild(s);
+    b.addEventListener('click', function () { selectFilter(f); });
+    var ob = document.createElement('i'); ob.className = 'ord'; b.appendChild(ob);
+    strip.appendChild(b); chips.push({ f: f, el: b, cv: c, ord: ob });
+  });
+  GROUPS.forEach(function (g) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.textContent = g.name;
+    b.addEventListener('click', function () { showGroup(g.n); });
+    $('tabs').appendChild(b); tabBtns.push({ n: g.n, el: b });
+  });
+  function showGroup(n) {
+    tabBtns.forEach(function (t) { t.el.setAttribute('aria-selected', t.n === n ? 'true' : 'false'); });
+    chips.forEach(function (ch) { ch.el.hidden = !(ch.f.id === 'none' || ch.f.g === n); });
+    strip.scrollLeft = 0;
+  }
+  showGroup(1);
+
+  function buildThumbs() {
+    var m = state.media; if (!m) return;
+    var base = document.createElement('canvas'); base.width = 144; base.height = 144;
+    var bx = base.getContext('2d');
+    var s = Math.max(144 / m.w, 144 / m.h), dw = m.w * s, dh = m.h * s;
+    try { bx.drawImage(m.src, (144 - dw) / 2, (144 - dh) / 2, dw, dh); } catch (e) { return; }
+    if (!T) return;
+    chips.forEach(function (ch) {
+      T.render(base, [{ f: ch.f, a: 1 }], NOADJ, 144, 144, 0);
+      var c = ch.cv.getContext('2d'); c.clearRect(0, 0, 144, 144);
+      c.drawImage(thumbCv, 0, 0);
+    });
+  }
+
+  function idxOf(f) { for (var i = 0; i < state.stack.length; i++) { if (state.stack[i].f === f) return i; } return -1; }
+  function selectFilter(f) {
+    if (f.id === 'none') { state.stack = []; }
+    else if (!state.combine) { state.stack = [{ f: f, a: 1 }]; }
+    else {
+      var i = idxOf(f);
+      if (i >= 0) state.stack.splice(i, 1);
+      else if (state.stack.length >= 3) { say('تقدر تدمج لحد 3 فلاتر. شيل واحد أول.', 'err'); return; }
+      else state.stack.push({ f: f, a: state.stack.length ? .7 : 1 });
+    }
+    updateFilterUI(); redraw();
+  }
+  function renderStack() {
+    var box = $('stackBox'); box.innerHTML = '';
+    if (!state.combine || !state.stack.length) { box.hidden = true; return; }
+    box.hidden = false;
+    state.stack.forEach(function (x, i) {
+      var row = document.createElement('div'); row.className = 'stackrow';
+      var nm = document.createElement('span'); nm.textContent = (i + 1) + '. ' + x.f.name;
+      var rg = document.createElement('input'); rg.type = 'range'; rg.min = 0; rg.max = 100; rg.value = Math.round(x.a * 100);
+      rg.setAttribute('aria-label', 'شدة ' + x.f.name);
+      rg.addEventListener('input', function () { x.a = this.value / 100; redraw(); });
+      var rm = document.createElement('button'); rm.type = 'button'; rm.textContent = '✕'; rm.setAttribute('aria-label', 'شيل ' + x.f.name);
+      rm.addEventListener('click', function () { state.stack.splice(i, 1); updateFilterUI(); redraw(); });
+      row.appendChild(nm); row.appendChild(rg); row.appendChild(rm); box.appendChild(row);
+    });
+  }
+  function updateFilterUI() {
+    chips.forEach(function (ch) {
+      var i = idxOf(ch.f), on = ch.f.id === 'none' ? state.stack.length === 0 : i >= 0;
+      ch.el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      ch.ord.textContent = (state.combine && i >= 0) ? String(i + 1) : '';
+    });
+    $('fname').textContent = state.stack.length ? state.stack.map(function (x) { return x.f.name; }).join(' + ') : 'الأصلي';
+    $('combineHint').textContent = state.combine ? 'اضغط على الفلاتر لدمجها (لحد 3)، ولكل واحد شدته.' : '';
+    renderStack();
+  }
+  $('combineBtn').addEventListener('click', function () {
+    state.combine = !state.combine; this.setAttribute('aria-pressed', String(state.combine));
+    if (!state.combine && state.stack.length > 1) state.stack = state.stack.slice(0, 1);
+    updateFilterUI(); redraw();
+  });
+
+  /* ---------- image adjustments ---------- */
+  var ADJ = [['bri', 'السطوع', -100], ['con', 'التباين', -100], ['sat', 'التشبع', -100], ['vib', 'الحيوية', -100], ['temp', 'الدفء', -100],
+             ['tint', 'الصبغة', -100], ['hi', 'الإضاءات', -100], ['sh', 'الظلال', -100], ['fade', 'مات', 0], ['vig', 'الحواف', -100], ['grain', 'الحبيبات', 0]];
+  var adjInputs = [];
+  function updateAdjCount() {
+    var n = 0; for (var k in adjRaw) { if (adjRaw[k] !== 0) n++; }
+    $('adjCount').textContent = n ? ' (' + n + ')' : '';
+  }
+  ADJ.forEach(function (a) {
+    var row = document.createElement('div'); row.className = 'slider';
+    var id = 'adj-' + a[0];
+    row.innerHTML = '<label for="' + id + '">' + a[1] + '</label><input type="range" id="' + id + '" min="' + a[2] + '" max="100" value="0"><output>0</output>';
+    var inp = row.querySelector('input'), out = row.querySelector('output');
+    inp.addEventListener('input', function () { adjRaw[a[0]] = +this.value; out.textContent = this.value; computeAdj(); updateAdjCount(); redraw(); });
+    row.querySelector('label').addEventListener('dblclick', function () { inp.value = 0; inp.dispatchEvent(new Event('input')); });
+    $('adjList').appendChild(row); adjInputs.push({ inp: inp, out: out });
+  });
+  $('adjReset').addEventListener('click', function () {
+    adjInputs.forEach(function (x) { x.inp.value = 0; x.out.textContent = '0'; });
+    for (var k in adjRaw) adjRaw[k] = 0;
+    computeAdj(); updateAdjCount(); redraw();
+  });
+
+  /* ---------- preview ---------- */
+  function redraw() {
+    var m = state.media; if (!m || !R || state.exporting) return;
+    var orig = state.showOrig;
+    R.render(m.src, orig ? [] : stackAmt(), orig ? NOADJ : adj, cv.width, cv.height, orig ? 0 : opts.sharp);
+    $('badge').className = 'badge' + (state.showOrig ? ' orig' : '');
+    if (state.showOrig) { $('badge').textContent = 'الأصل'; $('badge').hidden = false; }
+    else if (m.kind === 'sample') { $('badge').textContent = 'صورة تجريبية'; $('badge').hidden = false; }
+    else { $('badge').hidden = true; }
+  }
+
+  var raf = 0;
+  function loop() {
+    raf = 0;
+    var m = state.media;
+    if (!m || m.kind !== 'video' || state.exporting) return;
+    redraw();
+    if (!m.el.paused && !m.el.ended) raf = requestAnimationFrame(loop);
+  }
+  function startLoop() { if (!raf) raf = requestAnimationFrame(loop); }
+
+  function sizeCanvas(w, h, cap) {
+    var s = Math.min(1, cap / Math.max(w, h));
+    cv.width = Math.max(2, Math.round(w * s)); cv.height = Math.max(2, Math.round(h * s));
+  }
+
+  /* hold to compare with the original */
+  function hold(on) { if (state.showOrig === on) return; state.showOrig = on; redraw(); }
+  cv.addEventListener('pointerdown', function () { hold(true); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (e) { cv.addEventListener(e, function () { hold(false); }); });
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  $('amt').addEventListener('input', function () {
+    state.amount = this.value / 100; $('amtOut').textContent = this.value + '%'; redraw();
+  });
+
+  /* ---------- output quality: sizes, estimate, notes ---------- */
+  function fmtSize(b) { return b >= 1e9 ? (b / 1e9).toFixed(1) + ' GB' : Math.max(1, Math.round(b / 1e6)) + ' MB'; }
+  function resLabel(v) { return v >= 2160 ? '4K' : v >= 1440 ? '2K' : v + 'p'; }
+
+  function outSpec(m) {
+    var short = Math.min(m.w, m.h), Tt = opts.vres || short, sc = Tt / short;
+    var w = Math.max(2, Math.round(m.w * sc / 2) * 2), h = Math.max(2, Math.round(m.h * sc / 2) * 2);
+    var cap = Math.min(R ? R.maxTex : 4096, 5120);
+    if (Math.max(w, h) > cap) { var k = cap / Math.max(w, h); w = Math.round(w * k / 2) * 2; h = Math.round(h * k / 2) * 2; }
+    var fps = opts.fps;
+    var bps = Math.min(60e6, Math.max(1.5e6, w * h * 3 * Math.pow(fps / 30, .8)));
+    return { w: w, h: h, fps: fps, bps: bps };
+  }
+  function imgSpec(m) {
+    var long = Math.max(m.w, m.h), target = opts.ires || long;
+    target = Math.min(target, Math.min(R ? R.maxTex : 4096, 8192));
+    var s = target / long;
+    return { w: Math.max(2, Math.round(m.w * s)), h: Math.max(2, Math.round(m.h * s)), up: target > long };
+  }
+
+  function updateEstimate() {
+    var m = state.media; if (!m) return;
+    var est = $('estimate'), note = $('qNote'), lines = [], tooBig = false;
+    if (m.kind === 'video') {
+      var o = outSpec(m), tr = trimRange(m), dur = tr.d ? tr.e - tr.s : 600, bytes = o.bps * dur / 8;
+      est.textContent = 'الناتج: ' + o.w + '×' + o.h + ' · ' + o.fps + ' فريم · حجم تقريبي ' + fmtSize(bytes) + (tr.d ? ' · وقت التصدير ≈ ' + fmt(dur) : '');
+      tooBig = bytes > 2.5e9;
+      if (opts.vres && opts.vres > Math.min(m.w, m.h)) lines.push('الفيديو الأصلي ' + m.w + '×' + m.h + '. التكبير إلى ' + resLabel(opts.vres) + ' يحسّن الحدة بس ما يضيف تفاصيل جديدة، و4K الحقيقي يحتاج فيديو مصوّر بـ 4K.');
+      if (m.fps && opts.fps >= 50 && m.fps < 45) lines.push('الفيديو الأصلي حوالي ' + Math.round(m.fps) + ' فريم. خيار 60 يضيف فريم ممزوج بين كل فريمين، فيصير الحركة أنعم شوي، بس مو 60 فريم حقيقية وممكن يظهر طيف خفيف بالحركة السريعة.');
+      else if (m.fps && opts.fps > m.fps + 3) lines.push('الفيديو الأصلي حوالي ' + Math.round(m.fps) + ' فريم. ' + opts.fps + ' فريم ما يضيف حركة جديدة، فقط يتكرر بعض الفريمات.');
+      if (opts.vres >= 2160 || opts.fps >= 60) lines.push('هذي الإعدادات ثقيلة على الجهاز. إذا ما كفى المعالج، الفريمات تنزل أثناء التصدير.');
+      if (tooBig) lines.push('الحجم المتوقع كبير جداً وممكن الصفحة توقف. قلّل الدقة أو الفريمات.');
+    } else {
+      var i = imgSpec(m);
+      est.textContent = 'الناتج: ' + i.w + '×' + i.h;
+      if (i.up) lines.push('التكبير يحسّن الحدة بس ما يضيف تفاصيل جديدة. الصورة الأصلية ' + m.w + '×' + m.h + '.');
+    }
+    est.className = 'estimate' + (tooBig ? ' err' : '');
+    note.hidden = !lines.length; note.textContent = lines.join(' ');
+    if (!state.exporting) $('exportBtn').disabled = tooBig;
+  }
+
+  [['segVRes', 'vres'], ['segFps', 'fps'], ['segIRes', 'ires'], ['segSharp', 'sharp']].forEach(function (pair) {
+    var btns = [].slice.call($(pair[0]).querySelectorAll('button'));
+    function sync() { btns.forEach(function (b) { b.setAttribute('aria-checked', String(parseFloat(b.dataset.v) === opts[pair[1]])); }); }
+    btns.forEach(function (b) { b.addEventListener('click', function () { opts[pair[1]] = parseFloat(b.dataset.v); sync(); updateEstimate(); redraw(); }); });
+    sync();
+  });
+
+  function probeFps(v, done) {
+    if (!v.requestVideoFrameCallback) { done(0); return; }
+    var t0 = v.currentTime, was = v.muted, times = [], fin = false, timer = 0;
+    function finish() {
+      if (fin) return; fin = true; clearTimeout(timer);
+      try { v.pause(); } catch (e) {}
+      v.muted = was; try { v.currentTime = t0; } catch (e) {}
+      var d = [];
+      for (var i = 1; i < times.length; i++) { var x = times[i] - times[i - 1]; if (x > 0) d.push(x); }
+      if (d.length < 4) { done(0); return; }
+      d.sort(function (a, b) { return a - b; });
+      var f = 1 / d[Math.floor(d.length / 2)], snap = [24, 25, 30, 48, 50, 60, 120];
+      for (var j = 0; j < snap.length; j++) { if (Math.abs(f - snap[j]) / snap[j] < .08) { f = snap[j]; break; } }
+      done(f);
+    }
+    function cb(now, meta) { times.push(meta.mediaTime); if (times.length >= 16) finish(); else v.requestVideoFrameCallback(cb); }
+    v.muted = true; v.requestVideoFrameCallback(cb);
+    v.play().then(function () { timer = setTimeout(finish, 2500); }).catch(finish);
+  }
+
+  /* ---------- loading media ---------- */
+  function setMedia(m) {
+    state.media = m;
+    var isVid = m.kind === 'video';
+    $('player').hidden = !isVid; $('qVideo').hidden = !isVid; $('qImage').hidden = isVid; $('vidNote').hidden = !isVid;
+    $('exportBtn').textContent = isVid ? 'طبّق الفلتر وصدّر الفيديو' : 'طبّق الفلتر وحمّل الصورة';
+    $('result').hidden = true; $('result').innerHTML = '';
+    sizeCanvas(m.w, m.h, isVid ? 960 : 1280);
+    if (isVid) { trim.a = 0; trim.b = 1000; updateTrimUI(); }
+    state.autoIdx = 0; autoSnap = null; $('autoNote').hidden = true; $('autoUndo').hidden = true;
+    buildThumbs(); redraw(); updateEstimate(); updateDel();
+  }
+
+  $('pickBtn').addEventListener('click', function () { $('file').click(); });
+  $('file').addEventListener('change', function () {
+    var inp = this, f = inp.files && inp.files[0];
+    if (!f) { say('ما انختار ملف. جرّب مرة ثانية.', 'err'); return; }
+    var nm = f.name || '', ty = f.type || ''; try { inp.value = ''; } catch (e) {}
+    if (!ty) {
+      var ex = (nm.split('.').pop() || '').toLowerCase();
+      if (/^(mp4|mov|m4v|webm|mkv|3gp|avi)$/.test(ex)) ty = 'video/' + ex;
+      else if (/^(jpg|jpeg|png|webp|gif|bmp|avif|heic|heif)$/.test(ex)) ty = 'image/' + ex;
+    }
+    say('وصل الملف: ' + nm + ' · ' + (f.size / 1048576).toFixed(1) + ' MB ... جاري الفتح');
+    setTimeout(function () {
+      try {
+        if (ty.indexOf('video/') === 0) loadVideo(f);
+        else if (ty.indexOf('image/') === 0) loadImage(f);
+        else say('هذا الملف مو صورة ولا فيديو.', 'err');
+      } catch (e) { say('صار خطأ بفتح الملف: ' + (e && e.message || e), 'err'); }
+    }, 30);
+  });
+  window.addEventListener('error', function (e) { try { say('خطأ بالصفحة: ' + (e.message || ''), 'err'); } catch (x) {} });
+
+  function resetMedia() {
+    var old = state.media;
+    if (old && old.el && old.kind === 'video') { try { old.el.__dead = true; old.el.pause(); old.el.removeAttribute('src'); old.el.load(); } catch (e) {} }
+    revokeAll(); audio = null;
+  }
+
+  function loadImage(file) {
+    resetMedia(); say('جاري تحميل الصورة...');
+    var img = new Image(); var u = track(URL.createObjectURL(file));
+    img.onload = function () {
+      setMedia({ kind: 'image', src: img, w: img.naturalWidth, h: img.naturalHeight, name: file.name });
+      say('');
+    };
+    img.onerror = function () { say('ما قدرت أقرا الصورة. جرّب صيغة JPG أو PNG.', 'err'); };
+    img.src = u;
+  }
+
+  function loadVideo(file) {
+    resetMedia(); say('جاري تحميل الفيديو...');
+    var v = document.createElement('video');
+    v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'metadata';
+    var u = track(URL.createObjectURL(file));
+    var first = true, gotMeta = false, tooLong = false, t0 = Date.now();
+    function ready() {
+      if (!first) return; first = false;
+      setMedia({ kind: 'video', src: v, el: v, w: v.videoWidth, h: v.videoHeight, name: file.name, file: file });
+      $('time').textContent = fmt(v.currentTime) + ' / ' + fmt(v.duration);
+      say('تم. اختار فلتر وشوف النتيجة.', 'ok');
+      probeFps(v, function (f) { var mm = state.media; if (mm && mm.el === v && f) { mm.fps = f; updateEstimate(); if (f < 18) say('تنبيه: فريمات هذا الفيديو قليلة (حوالي ' + Math.round(f) + ' بالثانية) ولهذا يظهر متقطع. المشكلة بالملف نفسه، مو بالفلتر. صدّره من التطبيق الأصلي بـ 30 فريم.', 'err'); } });
+    }
+    var wd = setInterval(function () {
+      if (!first || tooLong || state.media && state.media.el === v) { clearInterval(wd); return; }
+      var sec = Math.round((Date.now() - t0) / 1000);
+      if (!gotMeta) {
+        say('جاري قراءة الفيديو... ' + sec + ' ثانية' + (sec > 20 ? ' (ملفات كبيرة تاخذ وقت، لا تطلع من الصفحة)' : ''));
+        if (sec > 60) { clearInterval(wd); say('الفيديو ما انفتح. غالباً الصيغة مو مدعومة (HEVC/H.265). صوّره أو حوّله بصيغة H.264 MP4 وجرّب.', 'err'); }
+      } else if (v.readyState >= 2) { clearInterval(wd); ready(); }
+    }, 1000);
+    v.addEventListener('loadedmetadata', function () {
+      gotMeta = true;
+      if (isFinite(v.duration) && v.duration > MAX_SECONDS + 1) {
+        tooLong = true; first = false;
+        say('الفيديو ' + fmt(v.duration) + '، أطول من 30 دقيقة. قصّه وارفعه مرة ثانية.', 'err');
+        return;
+      }
+      try { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); } catch (e) {}
+    });
+    v.addEventListener('loadeddata', function () { setTimeout(function () { if (first && gotMeta) ready(); }, 2500); });
+    v.addEventListener('seeked', function () {
+      if (first) {
+        ready();
+      } else if (!state.exporting) { redraw(); }
+    });
+    v.addEventListener('play', function () { $('playBtn').textContent = '❚❚'; $('playBtn').setAttribute('aria-label', 'إيقاف'); startLoop(); });
+    v.addEventListener('pause', function () { $('playBtn').textContent = '▶'; $('playBtn').setAttribute('aria-label', 'تشغيل'); redraw(); });
+    v.addEventListener('ended', function () { $('playBtn').textContent = '▶'; redraw(); });
+    v.addEventListener('timeupdate', function () {
+      if (!state.exporting && trim.b < 1000 && v.duration && v.currentTime >= v.duration * trim.b / 1000) { v.pause(); }
+      if (dragging) return;
+      $('seek').value = v.duration ? Math.round(v.currentTime / v.duration * 1000) : 0;
+      $('time').textContent = fmt(v.currentTime) + ' / ' + fmt(v.duration);
+    });
+    v.addEventListener('error', function () { if (v.__dead || !v.getAttribute('src')) return; say('المتصفح ما قدر يفتح هذا الفيديو. جرّب MP4.', 'err'); });
+    v.src = u;
+  }
+
+  var dragging = false;
+  $('playBtn').addEventListener('click', function () {
+    var m = state.media; if (!m || m.kind !== 'video') return;
+    if (audio) audio.ac.resume();
+    if (m.el.paused) { var tr = trimRange(m); if (tr.d && (m.el.currentTime < tr.s - .05 || m.el.currentTime >= tr.e - .05)) m.el.currentTime = tr.s; m.el.play().catch(function () {}); } else m.el.pause();
+  });
+  $('seek').addEventListener('input', function () {
+    var m = state.media; if (!m || m.kind !== 'video') return;
+    dragging = true;
+    m.el.currentTime = m.el.duration * this.value / 1000;
+    $('time').textContent = fmt(m.el.currentTime) + ' / ' + fmt(m.el.duration);
+  });
+  $('seek').addEventListener('change', function () { dragging = false; });
+
+  /* ---------- saving ---------- */
+  async function saveFile(blob, filename) {
+    var dl = null;
+    try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+    if (dl) {
+      try { await dl.save({ filename: filename, data: blob }); say('تم الحفظ.', 'ok'); return; }
+      catch (e) { if (e && e.code === 'declined') return; say('ما تم الحفظ. حاول مرة ثانية.', 'err'); return; }
+    }
+    var a = document.createElement('a');
+    a.href = track(URL.createObjectURL(blob)); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    say('تم الحفظ. شوفه بمجلد التنزيلات.', 'ok');
+  }
+
+  function showResult(blob, filename, isVideo) {
+    var r = $('result'); r.innerHTML = ''; r.hidden = false;
+    var u = track(URL.createObjectURL(blob));
+    var el = document.createElement(isVideo ? 'video' : 'img');
+    el.src = u;
+    if (isVideo) { el.controls = true; el.playsInline = true; }
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn btn-primary'; b.textContent = 'حفظ ' + (isVideo ? 'الفيديو' : 'الصورة') + ' (' + (blob.size / 1048576).toFixed(1) + ' MB)';
+    b.addEventListener('click', function () { saveFile(blob, filename); });
+    var d = document.createElement('button');
+    d.type = 'button'; d.className = 'btn btn-ghost'; d.textContent = 'حذف النتيجة';
+    d.addEventListener('click', function () { r.hidden = true; r.innerHTML = ''; try { URL.revokeObjectURL(u); } catch (e) {} say('تم حذف النتيجة.', 'ok'); });
+    r.appendChild(el); r.appendChild(b); r.appendChild(d);
+    r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ---------- export ---------- */
+  var audio = null;
+  $('exportBtn').addEventListener('click', function () {
+    var m = state.media; if (!m || state.exporting) return;
+    if (m.kind === 'video') exportVideo(); else exportImage();
+  });
+
+  function exportImage() {
+    var m = state.media, c = document.createElement('canvas'), RR;
+    try { RR = new Renderer(c); } catch (e) { say('المتصفح ما يدعم معالجة الصور هنا. استعمل كروم.', 'err'); return; }
+    var sp = imgSpec(m), w = Math.min(sp.w, RR.maxTex), h = Math.min(sp.h, RR.maxTex);
+    RR.render(m.src, stackAmt(), adj, w, h, opts.sharp);
+    c.toBlob(function (blob) {
+      RR.dispose();
+      if (!blob) { say('ما قدرت أجهز الصورة.', 'err'); return; }
+      var name = 'flixo-' + stackName() + '.jpg';
+      showResult(blob, name, false); say('الصورة جاهزة.', 'ok');
+    }, 'image/jpeg', 0.95);
+  }
+
+  function pickMime(w, h) {
+    var big = Math.max(w, h);
+    var avc = big > 2560 ? 'avc1.640034' : big > 1280 ? 'avc1.640028' : 'avc1.42E01E';
+    var list = ['video/mp4;codecs=' + avc + ',mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    for (var i = 0; i < list.length; i++) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(list[i])) return list[i]; }
+    return '';
+  }
+
+  /* ---------- minimal MP4 muxer (H.264 + optional AAC), moov first so it plays everywhere ---------- */
+  var Mp4 = (function () {
+    function u32(n) { return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255]; }
+    function u16(n) { return [(n >>> 8) & 255, n & 255]; }
+    function str(s) { return [s.charCodeAt(0), s.charCodeAt(1), s.charCodeAt(2), s.charCodeAt(3)]; }
+    function flat(list) {
+      var n = 0, i, j, out, p = 0;
+      for (i = 0; i < list.length; i++) n += list[i].length;
+      out = new Uint8Array(n);
+      for (i = 0; i < list.length; i++) { out.set(list[i], p); p += list[i].length; }
+      return out;
+    }
+    function box(type) {
+      var parts = [].slice.call(arguments, 1).map(function (x) { return x instanceof Uint8Array ? x : new Uint8Array(x); });
+      var body = flat(parts);
+      return flat([new Uint8Array(u32(body.length + 8)), new Uint8Array(str(type)), body]);
+    }
+    function zeros(n) { return new Uint8Array(n); }
+    var MATRIX = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x40, 0, 0, 0];
+    function fullbox(type, ver, flags) { return box.apply(null, [type, new Uint8Array([ver, (flags >> 16) & 255, (flags >> 8) & 255, flags & 255])].concat([].slice.call(arguments, 3))); }
+    function stts(durs) {
+      var runs = [], i;
+      for (i = 0; i < durs.length; i++) { var l = runs[runs.length - 1]; if (l && l[1] === durs[i]) l[0]++; else runs.push([1, durs[i]]); }
+      var b = [u32(runs.length)]; runs.forEach(function (r) { b.push(u32(r[0]), u32(r[1])); });
+      return fullbox('stts', 0, 0, flat(b.map(function (x) { return new Uint8Array(x); })));
+    }
+    function stsz(sizes) { var b = [u32(0), u32(sizes.length)]; sizes.forEach(function (s) { b.push(u32(s)); }); return fullbox('stsz', 0, 0, flat(b.map(function (x) { return new Uint8Array(x); }))); }
+    function stco(offs) { var b = [u32(offs.length)]; offs.forEach(function (o) { b.push(u32(o)); }); return fullbox('stco', 0, 0, flat(b.map(function (x) { return new Uint8Array(x); }))); }
+    function stsc() { return fullbox('stsc', 0, 0, new Uint8Array([].concat(u32(1), u32(1), u32(1), u32(1)))); }
+    function desc(tag, payload) { return flat([new Uint8Array([tag, payload.length]), payload]); }
+
+    function build(o) {
+      /* o.video: {w,h,avcC:Uint8Array,ts:[us],sizes:[],key:[bool]}  o.audio: null | {sr,ch,asc,sizes:[]} */
+      var V = o.video, A = o.audio, VT = 90000, i;
+      var vt = V.ts.map(function (t) { return Math.round(t * VT / 1e6); });
+      var vd = [], nV = vt.length;
+      for (i = 0; i < nV; i++) { var d = i + 1 < nV ? vt[i + 1] - vt[i] : (vd.length ? vd[vd.length - 1] : 3000); vd.push(Math.max(1, d)); }
+      var vDur = vd.reduce(function (a, b) { return a + b; }, 0);
+      var movDur = Math.round(vDur * 1000 / VT), aDur = 0;
+      if (A) { aDur = A.sizes.length * 1024; movDur = Math.max(movDur, Math.round(aDur * 1000 / A.sr)); }
+
+      function build_moov(vOffs, aOffs) {
+        var vstbl = box('stbl',
+          fullbox('stsd', 0, 0, new Uint8Array(u32(1)), box('avc1',
+            zeros(6), u16(1), zeros(16), u16(V.w), u16(V.h), u32(0x00480000), u32(0x00480000), zeros(4), u16(1), zeros(32), u16(0x18), u16(0xffff),
+            box('avcC', V.avcC))),
+          stts(vd),
+          (function () { var k = []; V.key.forEach(function (f, idx) { if (f) k.push(idx + 1); }); var b = [u32(k.length)]; k.forEach(function (x) { b.push(u32(x)); }); return fullbox('stss', 0, 0, flat(b.map(function (x) { return new Uint8Array(x); }))); })(),
+          stsc(), stsz(V.sizes), stco(vOffs));
+        var vtrak = box('trak',
+          fullbox('tkhd', 0, 3, zeros(8), u32(1), zeros(4), u32(movDur), zeros(8), u16(0), u16(0), u16(0), u16(0), MATRIX, u32(V.w << 16), u32(V.h << 16)),
+          box('mdia', fullbox('mdhd', 0, 0, zeros(8), u32(VT), u32(vDur), u16(0x55c4), u16(0)),
+            fullbox('hdlr', 0, 0, zeros(4), str('vide'), zeros(12), new Uint8Array([86, 105, 100, 101, 111, 0])),
+            box('minf', fullbox('vmhd', 0, 1, zeros(8)), box('dinf', fullbox('dref', 0, 0, u32(1), fullbox('url ', 0, 1))), vstbl)));
+        var traks = [vtrak];
+        if (A) {
+          var asc = A.asc;
+          var esds = fullbox('esds', 0, 0, desc(3, flat([new Uint8Array([0, 0, 0]), desc(4, flat([new Uint8Array([0x40, 0x15, 0, 0, 0]), new Uint8Array(u32(A.bitrate || 128000)), new Uint8Array(u32(A.bitrate || 128000)), desc(5, asc)])), desc(6, new Uint8Array([2]))])));
+          var astbl;
+          /* proper stts: all samples 1024 */
+          astbl = box('stbl',
+            fullbox('stsd', 0, 0, new Uint8Array(u32(1)), box('mp4a', zeros(6), u16(1), zeros(8), u16(A.ch), u16(16), zeros(4), u32(A.sr << 16), esds)),
+            fullbox('stts', 0, 0, new Uint8Array([].concat(u32(1), u32(A.sizes.length), u32(1024)))), stsc(), stsz(A.sizes), stco(aOffs));
+          traks.push(box('trak',
+            fullbox('tkhd', 0, 3, zeros(8), u32(2), zeros(4), u32(movDur), zeros(8), u16(0), u16(0), u16(0x0100), u16(0), MATRIX, u32(0), u32(0)),
+            box('mdia', fullbox('mdhd', 0, 0, zeros(8), u32(A.sr), u32(aDur), u16(0x55c4), u16(0)),
+              fullbox('hdlr', 0, 0, zeros(4), str('soun'), zeros(12), new Uint8Array([83, 111, 117, 110, 100, 0])),
+              box('minf', fullbox('smhd', 0, 0, zeros(4)), box('dinf', fullbox('dref', 0, 0, u32(1), fullbox('url ', 0, 1))), astbl))));
+        }
+        return box.apply(null, ['moov',
+          fullbox('mvhd', 0, 0, zeros(8), u32(1000), u32(movDur), u32(0x00010000), u16(0x0100), zeros(10), MATRIX, zeros(24), u32(A ? 3 : 2))
+        ].concat(traks));
+      }
+      function offsets(start, sizes) { var o = [], p = start; sizes.forEach(function (s) { o.push(p); p += s; }); return o; }
+      var vTotal = V.sizes.reduce(function (a, b) { return a + b; }, 0), aTotal = A ? A.sizes.reduce(function (a, b) { return a + b; }, 0) : 0;
+      var ftyp = box('ftyp', str('isom'), u32(512), str('isom'), str('iso2'), str('avc1'), str('mp41'));
+      var fake = build_moov(offsets(0, V.sizes), A ? offsets(0, A.sizes) : []);
+      var mdatStart = ftyp.length + fake.length + 8;
+      var moov = build_moov(offsets(mdatStart, V.sizes), A ? offsets(mdatStart + vTotal, A.sizes) : []);
+      var mdatHead = new Uint8Array([].concat(u32(vTotal + aTotal + 8), str('mdat')));
+      return { head: [ftyp, moov, mdatHead], total: ftyp.length + moov.length + 8 + vTotal + aTotal };
+    }
+    return { build: build };
+  })();
+
+  /* ---------- fast export: WebCodecs, every frame stamped with its real time (smooth even when the phone is slow) ---------- */
+  async function exportVideoFast() {
+    var m = state.media, v = m.el, file = m.file;
+    if (!file || !window.VideoEncoder || !window.VideoFrame || !v.requestVideoFrameCallback) return false;
+    var o = outSpec(m), w = o.w, h = o.h, fps = o.fps, bps = Math.round(o.bps);
+    var tr = trimRange(m), startT = tr.s, endT = tr.d ? tr.e : (v.duration || 0), spanT = Math.max(.1, endT - startT);
+    if (!endT || file.size > 150e6 || (v.duration || 0) > 420 || bps * spanT / 8 > 400e6) return false;
+
+    var px = w * h, codecs = px > 2100000 ? ['avc1.640033', 'avc1.4d0033', 'avc1.640032'] : px > 950000 ? ['avc1.64002A', 'avc1.4d002A', 'avc1.42002A'] : ['avc1.64001F', 'avc1.4d001F', 'avc1.42001F'];
+    var cfg = null, i;
+    for (i = 0; i < codecs.length && !cfg; i++) {
+      try {
+        var sup = await VideoEncoder.isConfigSupported({ codec: codecs[i], width: w, height: h, bitrate: bps, framerate: fps, latencyMode: 'realtime', avc: { format: 'avc' } });
+        if (sup && sup.supported) cfg = sup.config;
+      } catch (e) {}
+    }
+    if (!cfg) return false;
+
+    /* audio: decode the file's sound once, then encode only the chosen part */
+    var abuf = null, sr = 48000, ch = 2;
+    say('جاري تجهيز الصوت...');
+    try {
+      var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      var octx = new OAC(2, 1, 48000);
+      abuf = await octx.decodeAudioData(await file.arrayBuffer());
+      ch = Math.min(2, abuf.numberOfChannels);
+    } catch (e) { abuf = null; }
+    if (!abuf && (v.webkitAudioDecodedByteCount > 0 || v.mozHasAudio === true)) return false;
+    if (abuf) {
+      var aok = false;
+      try { var asup = await AudioEncoder.isConfigSupported({ codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: ch, bitrate: 128000 }); aok = !!(asup && asup.supported); } catch (e) {}
+      if (!aok) return false;
+    }
+
+    state.exporting = true; state.cancelled = false;
+    $('app').classList.add('busy'); $('prog').hidden = false; $('exportBtn').disabled = true;
+    $('result').hidden = true; $('result').innerHTML = '';
+    cv.width = w; cv.height = h;
+    say('جاري التصدير... لا تطلع من الصفحة.');
+    var wake = null, wasMuted = v.muted;
+    try { if (navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+
+    var ctl = 0, wd = 0, done = false, encErr = null, endRes = function () {}, stalledOut = false;
+    function finish(ok, msg) {
+      clearInterval(ctl); clearInterval(wd); done = true;
+      state.exporting = false;
+      if (wake) { try { wake.release(); } catch (e) {} }
+      try { v.pause(); v.muted = wasMuted; v.playbackRate = 1; } catch (e) {}
+      $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; updateEstimate();
+      $('bar').style.width = '0%';
+      sizeCanvas(m.w, m.h, 960); redraw();
+      if (msg) say(msg, ok ? 'ok' : 'err');
+    }
+
+    try {
+      var vParts = [], vBatch = [], vSizes = [], vTs = [], vKey = [], avcC = null;
+      var enc = new VideoEncoder({
+        output: function (chunk, meta) {
+          if (!avcC && meta && meta.decoderConfig && meta.decoderConfig.description) {
+            var d = meta.decoderConfig.description;
+            avcC = d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength));
+          }
+          var b = new Uint8Array(chunk.byteLength); chunk.copyTo(b);
+          vBatch.push(b); vSizes.push(b.length); vTs.push(chunk.timestamp); vKey.push(chunk.type === 'key');
+          if (vBatch.length >= 100) { vParts.push(new Blob(vBatch)); vBatch = []; }
+        },
+        error: function (e) { encErr = e; endRes(); }
+      });
+      enc.configure(cfg);
+
+      v.pause();
+      await new Promise(function (res) { var f = function () { v.removeEventListener('seeked', f); res(); }; v.addEventListener('seeked', f); v.currentTime = startT; setTimeout(res, 1500); });
+      v.muted = true;
+
+      var rate = .5, pen = 1, proc = 0, drops = 0, calm = 0, lastT = -1, tPrev = 0, havePrev = false, nFrames = 0, lastTs = -1, lastKeyTs = -1e12, lastCT = -1, lastMove = Date.now(), lastPct = -1;
+      var srcFps = m.fps || 30, srcDt = 1 / srcFps, blend = fps >= 50 && srcFps < 45;
+      v.playbackRate = rate;
+
+      function emit(tSec, mix) {
+        R.draw(stackAmt(), adj, w, h, opts.sharp, mix);
+        var ts = Math.max(0, Math.round((tSec - startT) * 1e6));
+        if (ts <= lastTs) ts = lastTs + 1000;
+        lastTs = ts;
+        var f = new VideoFrame(cv, { timestamp: ts }), kf = nFrames === 0 || ts - lastKeyTs >= 2e6;
+        if (kf) lastKeyTs = ts;
+        try { enc.encode(f, { keyFrame: kf }); } catch (e) { encErr = e; }
+        f.close(); nFrames++;
+      }
+      function onSrc(now, meta) {
+        if (done || !state.exporting) return;
+        var t = meta.mediaTime;
+        if (t >= startT - 0.02) {
+          if (lastT >= 0 && t - lastT > srcDt * 1.7) drops++;
+          if (enc.encodeQueueSize > 10) drops++;
+          var p0 = performance.now();
+          if (R.upload(v)) {
+            if (blend && havePrev) emit((tPrev + t) / 2, .5);
+            emit(t, 0); havePrev = true; tPrev = t; lastT = t;
+          }
+          var pd = (performance.now() - p0) / 1000; proc = proc ? proc * .6 + pd * .4 : pd;
+          rate = Math.max(.04, Math.min(1, srcDt / (proc * 1.35)) * pen);
+          try { v.playbackRate = rate; } catch (e) {}
+          var pct = Math.max(0, Math.min(100, (t - startT) / spanT * 100)), r = Math.round(pct);
+          if (r !== lastPct) {
+            lastPct = r; $('bar').style.width = pct.toFixed(1) + '%';
+            $('progTxt').textContent = r + '% · باقي ' + fmt(Math.max(0, (endT - t) / Math.max(.1, rate)));
+          }
+          if (t + srcDt * 1.01 >= endT) { endRes(); return; }
+        }
+        v.requestVideoFrameCallback(onSrc);
+      }
+      function onPause() { if (state.exporting && !done && !v.ended && !state.cancelled) v.play().catch(function () {}); }
+      v.addEventListener('pause', onPause);
+
+      /* speed control: if the phone can't keep up, slow the source down so no frame is lost */
+      ctl = setInterval(function () {
+        if (drops > 0) { pen = Math.max(.3, pen * .8); calm = 0; }
+        else { calm++; if (calm >= 6 && pen < 1) { pen = Math.min(1, pen * 1.1); calm = 0; } }
+        drops = 0;
+      }, 500);
+      wd = setInterval(function () {
+        var n = Date.now();
+        if (v.currentTime !== lastCT) { lastCT = v.currentTime; lastMove = n; }
+        if (n - lastMove > 3000 && v.paused && !v.ended) v.play().catch(function () {});
+        if (n - lastMove > 12000) { stalledOut = true; endRes(); }
+      }, 1000);
+
+      var ended = new Promise(function (res) { endRes = res; v.addEventListener('ended', res, { once: true }); $('cancelBtn').onclick = function () { state.cancelled = true; res(); }; });
+      try { await v.play(); } catch (e) { v.removeEventListener('pause', onPause); try { enc.close(); } catch (x) {} finish(false, 'المتصفح منع تشغيل الفيديو. اضغط تشغيل مرة وحدة وبعدين صدّر.'); return true; }
+      v.requestVideoFrameCallback(onSrc);
+      await ended;
+      v.removeEventListener('pause', onPause);
+      clearInterval(ctl); clearInterval(wd);
+      v.pause();
+
+      if (state.cancelled) { try { enc.close(); } catch (e) {} finish(false, 'تم إلغاء التصدير.'); return true; }
+      if (encErr) throw encErr;
+      say('جاري إنهاء الفيديو...');
+      await enc.flush(); enc.close();
+      if (!avcC || !vSizes.length) throw new Error('no video data');
+
+      /* audio */
+      var aParts = [], aBatch = [], aSizes = [], asc = null;
+      if (abuf) {
+        var aEncErr = null, aenc = new AudioEncoder({
+          output: function (chunk, meta) {
+            if (!asc && meta && meta.decoderConfig && meta.decoderConfig.description) {
+              var d = meta.decoderConfig.description;
+              asc = d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength));
+            }
+            var b = new Uint8Array(chunk.byteLength); chunk.copyTo(b);
+            aBatch.push(b); aSizes.push(b.length);
+            if (aBatch.length >= 200) { aParts.push(new Blob(aBatch)); aBatch = []; }
+          },
+          error: function (e) { aEncErr = e; }
+        });
+        aenc.configure({ codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: ch, bitrate: 128000 });
+        var aEnd = Math.min(endT, (lastT >= 0 ? lastT + srcDt : endT), abuf.duration);
+        var s0 = Math.max(0, Math.floor(startT * sr)), s1 = Math.min(abuf.length, Math.floor(aEnd * sr)), blk = 4096, n = 0;
+        var chans = []; for (i = 0; i < ch; i++) chans.push(abuf.getChannelData(i));
+        for (var pos = s0; pos < s1 && !aEncErr; pos += blk) {
+          var cnt = Math.min(blk, s1 - pos), data = new Float32Array(cnt * ch);
+          for (i = 0; i < ch; i++) data.set(chans[i].subarray(pos, pos + cnt), i * cnt);
+          var ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: cnt, numberOfChannels: ch, timestamp: Math.round((pos - s0) / sr * 1e6), data: data });
+          aenc.encode(ad); ad.close();
+          if (++n % 40 === 0) { while (aenc.encodeQueueSize > 20) await new Promise(function (r) { setTimeout(r, 5); }); }
+        }
+        if (!aEncErr) { await aenc.flush(); }
+        try { aenc.close(); } catch (e) {}
+        if (aEncErr || !aSizes.length) { aSizes = []; aParts = []; aBatch = []; }
+        else if (!asc) asc = new Uint8Array([0x11, ch === 2 ? 0x90 : 0x88]);
+      }
+
+      var mp = Mp4.build({
+        video: { w: w, h: h, avcC: avcC, ts: vTs, sizes: vSizes, key: vKey },
+        audio: aSizes.length ? { sr: sr, ch: ch, asc: asc, sizes: aSizes, bitrate: 128000 } : null
+      });
+      var blob = new Blob(mp.head.concat(vParts, vBatch, aParts, aBatch), { type: 'video/mp4' });
+      var cut = stalledOut && endT - (lastT >= 0 ? lastT : 0) > 1.5;
+      finish(true, cut ? 'الفيديو وقف قبل النهاية، حفظت الجزء اللي انسجل.' : 'الفيديو جاهز.');
+      showResult(blob, 'flixo-' + stackName() + '.mp4', true);
+    } catch (e) {
+      finish(false, 'فشل التصدير السريع: ' + (e && e.message || e) + '. جرّب دقة أقل.');
+    }
+    return true;
+  }
+
+  async function exportVideo() {
+    var m = state.media, v = m.el;
+    try { if (await exportVideoFast()) return; } catch (e) { state.exporting = false; $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; }
+    if (!R || !window.MediaRecorder || !cv.captureStream) { say('المتصفح ما يدعم تصدير الفيديو. استعمل كروم.', 'err'); return; }
+    var o = outSpec(m), w = o.w, h = o.h, fps = o.fps, bps = o.bps;
+    var mime = pickMime(w, h); if (!mime) { say('المتصفح ما يدعم تسجيل الفيديو. استعمل كروم.', 'err'); return; }
+    var ext = mime.indexOf('mp4') > -1 ? 'mp4' : 'webm';
+    var tr = trimRange(m), startT = tr.s, endT = tr.d ? tr.e : Infinity;
+    var spanT = tr.d ? Math.max(.1, tr.e - tr.s) : (v.duration || 1), trimmed = !!tr.d && endT < tr.d - .05;
+
+    state.exporting = true; state.cancelled = false;
+    $('app').classList.add('busy'); $('prog').hidden = false; $('exportBtn').disabled = true;
+    $('result').hidden = true; $('result').innerHTML = '';
+    cv.width = w; cv.height = h;
+    say('جاري التصدير... لا تطلع من الصفحة.');
+
+    var wake = null;
+    try { if (navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+
+    var stream = cv.captureStream(fps);
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        if (!audio) {
+          var ac = new AC(), srcNode = ac.createMediaElementSource(v), dest = ac.createMediaStreamDestination(), mon = ac.createGain();
+          srcNode.connect(dest); srcNode.connect(mon); mon.connect(ac.destination);
+          audio = { ac: ac, dest: dest, mon: mon };
+        }
+        audio.mon.gain.value = 0; await audio.ac.resume();
+        audio.dest.stream.getAudioTracks().forEach(function (t) { stream.addTrack(t); });
+      }
+    } catch (e) {}
+
+    var chunks = [], rec;
+    try { rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bps }); }
+    catch (e) { finish(false, 'ما قدرت أبدأ التسجيل.'); return; }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onerror = function () { state.encErr = true; $('cancelBtn').click(); };
+    var stopped = new Promise(function (res) { rec.onstop = res; });
+
+    function finish(ok, msg) {
+      state.exporting = false;
+      if (wake) { try { wake.release(); } catch (e) {} }
+      if (audio) audio.mon.gain.value = 1;
+      $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; updateEstimate();
+      $('bar').style.width = '0%';
+      sizeCanvas(m.w, m.h, 960); redraw();
+      if (msg) say(msg, ok ? 'ok' : 'err');
+    }
+
+    v.pause();
+    await new Promise(function (res) { var f = function () { v.removeEventListener('seeked', f); res(); }; v.addEventListener('seeked', f); v.currentTime = startT; setTimeout(res, 1500); });
+    v.playbackRate = 1;
+
+    var lastCT = -1, lastMove = Date.now(), stalledOut = false, lastPct = -1, haveFrame = false, havePrev = false, fresh = false, midPending = false;
+    var useRVFC = !!v.requestVideoFrameCallback;
+    var blend = fps >= 50 && (m.fps || 30) < 45;
+    var needRepeat = !blend && fps > (m.fps || 30) + 3;
+    var endRes = function () {};
+    function onSrc() {
+      if (!state.exporting) return;
+      if (R.upload(v)) { haveFrame = true; fresh = true; midPending = blend && havePrev; }
+      v.requestVideoFrameCallback(onSrc);
+    }
+    function frame() {
+      if (!state.exporting) return;
+      if (!useRVFC && R.upload(v)) { haveFrame = true; fresh = true; }
+      if (haveFrame) {
+        if (midPending) { R.draw(stackAmt(), adj, w, h, opts.sharp, .5); midPending = false; }
+        else if (fresh || needRepeat) { R.draw(stackAmt(), adj, w, h, opts.sharp, 0); if (fresh) { fresh = false; havePrev = true; } }
+      }
+      var pct = Math.max(0, Math.min(100, (v.currentTime - startT) / spanT * 100));
+      var tgt = isFinite(endT) ? endT : (v.duration || 0), nowMs = Date.now();
+      if (v.currentTime !== lastCT) { lastCT = v.currentTime; lastMove = nowMs; }
+      if ((trimmed && v.currentTime >= endT) || (tgt && v.currentTime >= tgt - 0.12) || v.ended) endRes();
+      else if (nowMs - lastMove > 3000 && v.paused) { v.play().catch(function () {}); }
+      if (nowMs - lastMove > 10000) { stalledOut = true; endRes(); }
+      var r = Math.round(pct);
+      if (r !== lastPct) {
+        lastPct = r; $('bar').style.width = pct.toFixed(1) + '%';
+        $('progTxt').textContent = r + '% · باقي ' + fmt(Math.max(0, (isFinite(endT) ? endT : (v.duration || 0)) - v.currentTime));
+      }
+      requestAnimationFrame(frame);
+    }
+    function onPause() { if (state.exporting && !v.ended && !state.cancelled) v.play().catch(function () {}); }
+    v.addEventListener('pause', onPause);
+
+    var ended = new Promise(function (res) { endRes = res; v.addEventListener('ended', res, { once: true }); $('cancelBtn').onclick = function () { state.cancelled = true; res(); }; });
+
+    rec.start(1000);
+    try { await v.play(); } catch (e) { v.removeEventListener('pause', onPause); try { rec.stop(); } catch (x) {} finish(false, 'المتصفح منع تشغيل الفيديو. اضغط تشغيل مرة وحدة وبعدين صدّر.'); return; }
+    if (useRVFC) v.requestVideoFrameCallback(onSrc);
+    frame();
+    await ended;
+    await new Promise(function (r) { setTimeout(r, 350); });
+    v.removeEventListener('pause', onPause);
+    v.pause();
+    try { rec.stop(); } catch (e) {}
+    await stopped;
+
+    if (state.encErr) { state.encErr = false; finish(false, 'الجهاز ما قدر يرمّز بهذي الإعدادات. جرّب دقة أقل أو 30 فريم.'); return; }
+    if (state.cancelled) { finish(false, 'تم إلغاء التصدير.'); return; }
+    var blob = new Blob(chunks, { type: mime.split(';')[0] });
+    finish(true, stalledOut && (v.duration || 0) - v.currentTime > 1.5 ? 'الفيديو وقف قبل النهاية، حفظت الجزء اللي انسجل.' : 'الفيديو جاهز.');
+    showResult(blob, 'flixo-' + stackName() + '.' + ext, true);
+  }
+
+  /* ---------- trim ---------- */
+  function trimRange(m) {
+    var d = m && m.el && isFinite(m.el.duration) ? m.el.duration : 0;
+    return { s: d * trim.a / 1000, e: d * trim.b / 1000, d: d };
+  }
+  function updateTrimUI() {
+    var m = state.media, r = trimRange(m);
+    $('knobA').style.right = (trim.a / 10) + '%'; $('knobB').style.right = (trim.b / 10) + '%';
+    $('knobA').setAttribute('aria-valuenow', trim.a); $('knobB').setAttribute('aria-valuenow', trim.b);
+    $('trimSel').style.right = (trim.a / 10) + '%'; $('trimSel').style.width = ((trim.b - trim.a) / 10) + '%';
+    $('trimAo').textContent = fmt(r.s); $('trimBo').textContent = fmt(r.e);
+    $('trimInfo').textContent = r.d ? '· المدة ' + fmt(r.e - r.s) : '';
+    updateEstimate();
+  }
+  var trimSeekT = 0;
+  function setTrim(which, val) {
+    val = Math.round(clamp(val, 0, 1000));
+    if (which === 'A') trim.a = Math.min(val, trim.b - 5); else trim.b = Math.max(val, trim.a + 5);
+    updateTrimUI();
+    var m = state.media; if (!m || m.kind !== 'video') return;
+    clearTimeout(trimSeekT);
+    trimSeekT = setTimeout(function () { var r = trimRange(m); m.el.currentTime = which === 'A' ? r.s : Math.max(0, r.e - 0.1); }, 60);
+  }
+  function trimFrac(e) { var r = $('trim').getBoundingClientRect(); return clamp((r.right - e.clientX) / r.width, 0, 1) * 1000; }
+  var trimDrag = null;
+  function trimDown(which, e) {
+    if (state.exporting) return;
+    trimDrag = which; var k = $(which === 'A' ? 'knobA' : 'knobB');
+    try { k.setPointerCapture(e.pointerId); } catch (x) {}
+    e.preventDefault();
+  }
+  ['A', 'B'].forEach(function (w) {
+    var k = $(w === 'A' ? 'knobA' : 'knobB');
+    k.addEventListener('pointerdown', function (e) { e.stopPropagation(); trimDown(w, e); });
+    k.addEventListener('pointermove', function (e) { if (trimDrag === w) setTrim(w, trimFrac(e)); });
+    ['pointerup', 'pointercancel'].forEach(function (ev) { k.addEventListener(ev, function () { trimDrag = null; }); });
+    k.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowLeft' ? 10 : e.key === 'ArrowRight' ? -10 : 0; if (!d) return;
+      e.preventDefault(); setTrim(w, (w === 'A' ? trim.a : trim.b) + d);
+    });
+  });
+  $('trim').addEventListener('pointerdown', function (e) {
+    var f = trimFrac(e), w = Math.abs(f - trim.a) <= Math.abs(f - trim.b) ? 'A' : 'B';
+    setTrim(w, f); trimDown(w, e);
+  });
+  function playheadFrac() { var m = state.media; return m && m.kind === 'video' && isFinite(m.el.duration) && m.el.duration ? m.el.currentTime / m.el.duration * 1000 : null; }
+  $('trimSetA').addEventListener('click', function () { var f = playheadFrac(); if (f != null) setTrim('A', f); });
+  $('trimSetB').addEventListener('click', function () { var f = playheadFrac(); if (f != null) setTrim('B', f); });
+  $('trimReset').addEventListener('click', function () { trim.a = 0; trim.b = 1000; updateTrimUI(); });
+
+  /* ---------- auto enhance: reads the picture, then picks a filter, adjustments and quality ---------- */
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function analyzeFrame(m) {
+    var k = 96 / Math.max(m.w, m.h), W = Math.max(2, Math.round(m.w * k)), H = Math.max(2, Math.round(m.h * k));
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d'), d;
+    try { x.drawImage(m.src, 0, 0, W, H); d = x.getImageData(0, 0, W, H).data; } catch (e) { return null; }
+    var hist = new Array(256).fill(0), n = W * H, sy = 0, sr = 0, sg = 0, sb = 0, ss = 0;
+    for (var i = 0; i < d.length; i += 4) {
+      var r = d[i], g = d[i + 1], b = d[i + 2], y = .2126 * r + .7152 * g + .0722 * b;
+      hist[Math.min(255, y | 0)]++; sy += y; sr += r; sg += g; sb += b;
+      var mx = Math.max(r, g, b), mn = Math.min(r, g, b); ss += mx ? (mx - mn) / mx : 0;
+    }
+    function pct(p) { var t = n * p, a = 0; for (var j = 0; j < 256; j++) { a += hist[j]; if (a >= t) return j / 255; } return 1; }
+    var lo = 0, hi = 0; for (var q = 0; q < 8; q++) lo += hist[q]; for (var u = 248; u < 256; u++) hi += hist[u];
+    return { mean: sy / n / 255, p5: pct(.05), p95: pct(.95), sat: ss / n, r: sr / n, g: sg / n, b: sb / n, clipLo: lo / n, clipHi: hi / n };
+  }
+  function autoAdjust(st) {
+    var raw = { bri: 0, con: 0, sat: 0, vib: 10, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
+    var stops = clamp(Math.log(.46 / Math.max(.05, st.mean)) / Math.LN2, -.5, .6);
+    raw.bri = Math.round(stops / .9 * 100 * .65);
+    var range = st.p95 - st.p5;
+    if (range < .65) raw.con = Math.round(clamp((.72 - range) * 100, 0, 30)); else if (range > .92) raw.con = -8;
+    if (st.mean < .35 || st.clipLo > .12) raw.sh = Math.round(clamp((.4 - st.mean) * 100 + 15, 10, 40));
+    if (st.clipHi > .04 || st.p95 > .98) raw.hi = -Math.round(Math.min(40, 15 + st.clipHi * 300));
+    if (st.sat < .22) raw.sat = 15; else if (st.sat > .55) raw.sat = -8;
+    var cast = st.r - st.b; if (Math.abs(cast) > 18) raw.temp = Math.round(clamp(-cast / 255 * 80, -15, 15));
+    var gt = st.g - (st.r + st.b) / 2; if (Math.abs(gt) > 12) raw.tint = Math.round(clamp(-gt / 255 * 80, -10, 10));
+    return raw;
+  }
+  function pickFilters(st) {
+    var warm = st.r - st.b, green = st.g - (st.r + st.b) / 2, dark = st.mean < .32, bright = st.mean > .58, sat = st.sat;
+    if (green > 14) return bright ? ['sage', 'mint', 'green', 'factory'] : ['green', 'factory', 'water', 'sage'];
+    if (warm > 28) {
+      if (dark) return ['brown', 'amberdark', 'inception', 'godfather', 'copper'];
+      if (bright && sat > .4) return ['sunset', 'juno', 'autgold', 'tropic', 'golden'];
+      if (bright) return ['gold', 'golden', 'cafe', 'beige', 'desert'];
+      return ['cafe', 'wood', 'enola', 'redhair', 'juno'];
+    }
+    if (warm < -18) {
+      if (dark) return ['nightblue', 'teal', 'monoteal', 'dark', 'steel'];
+      if (bright) return ['skycine', 'portrait', 'euphoria', 'steel', 'ship'];
+      return ['teal', 'train', 'ship', 'coldgray', 'bridge'];
+    }
+    if (sat < .2) return ['portrait', 'dressing', 'beige', 'euphoria', 'dusty', 'cliffs'];
+    if (sat > .45) return ['vivstreet', 'tropic', 'city', 'hdr', 'sport'];
+    if (dark) return ['dark', 'cliffs', 'coldgray', 'teal'];
+    return ['city', 'portrait', 'cafe', 'sport', 'hdr', 'dressing'];
+  }
+  function setSeg(id, v) { var b = $(id).querySelector('button[data-v="' + v + '"]'); if (b) b.click(); }
+  function applyAdjRaw(raw) {
+    for (var k in adjRaw) adjRaw[k] = raw[k] || 0;
+    ADJ.forEach(function (a, i) { adjInputs[i].inp.value = adjRaw[a[0]]; adjInputs[i].out.textContent = String(adjRaw[a[0]]); });
+    computeAdj(); updateAdjCount();
+  }
+  function setAmount(v) { state.amount = v; $('amt').value = Math.round(v * 100); $('amtOut').textContent = Math.round(v * 100) + '%'; }
+  var autoSnap = null;
+  $('autoBtn').addEventListener('click', function () {
+    var m = state.media; if (!m || state.exporting) return;
+    var st = analyzeFrame(m);
+    if (!st) { say('ما قدرت أحلل الصورة.', 'err'); return; }
+    if (!autoSnap) autoSnap = { stack: state.stack.map(function (x) { return { f: x.f, a: x.a }; }), amount: state.amount, raw: JSON.parse(JSON.stringify(adjRaw)), opts: JSON.parse(JSON.stringify(opts)) };
+    var raw = autoAdjust(st), cands = pickFilters(st).filter(function (id) { return FILTERS.some(function (f) { return f.id === id; }); });
+    var id = cands[(state.autoIdx || 0) % cands.length]; state.autoIdx = (state.autoIdx || 0) + 1;
+    var f = FILTERS.filter(function (x) { return x.id === id; })[0];
+    applyAdjRaw(raw);
+    state.stack = [{ f: f, a: 1 }]; setAmount(.85);
+    var qtxt = '';
+    if (m.kind === 'video') {
+      var short = Math.min(m.w, m.h), tr = trimRange(m), dur = tr.d ? tr.e - tr.s : 0;
+      var cap = dur > 900 ? 720 : 1080, vr = short <= cap ? 0 : cap, fp = (m.fps || 30) >= 50 ? 60 : 30;
+      setSeg('segVRes', vr); setSeg('segFps', fp); setSeg('segSharp', short < 540 ? '0.5' : '0');
+      qtxt = ' الجودة: ' + (vr ? resLabel(vr) : 'الأصلية') + ' و' + fp + ' فريم' + (dur > 900 ? ' (الفيديو طويل، فاخترت دقة أخف)' : '') + '.';
+    } else {
+      setSeg('segIRes', 0); setSeg('segSharp', Math.max(m.w, m.h) < 1000 ? '0.5' : '0');
+      qtxt = ' الجودة: الدقة الأصلية.';
+    }
+    updateFilterUI(); redraw(); updateEstimate();
+    var parts = []; ADJ.forEach(function (a) { var v = adjRaw[a[0]]; if (v) parts.push(a[1] + ' ' + (v > 0 ? '+' : '') + v); });
+    $('autoNote').textContent = 'طبّقت فلتر «' + f.name + '»' + (parts.length ? ' مع: ' + parts.join('، ') : '') + '.' + qtxt + ' اضغط مرة ثانية لفلتر ثاني.';
+    $('autoNote').hidden = false; $('autoUndo').hidden = false;
+  });
+  $('autoUndo').addEventListener('click', function () {
+    if (!autoSnap || state.exporting) return;
+    var sn = autoSnap; autoSnap = null;
+    state.stack = sn.stack; setAmount(sn.amount); applyAdjRaw(sn.raw);
+    setSeg('segVRes', sn.opts.vres); setSeg('segFps', sn.opts.fps); setSeg('segIRes', sn.opts.ires); setSeg('segSharp', String(sn.opts.sharp));
+    state.autoIdx = 0; updateFilterUI(); redraw(); updateEstimate();
+    $('autoNote').hidden = true; this.hidden = true;
+  });
+
+  /* ---------- delete the current photo / video ---------- */
+  var delTimer = 0;
+  function disarmDel() { var b = $('delBtn'); b.dataset.arm = ''; b.textContent = 'حذف'; b.classList.remove('btn-danger'); }
+  function updateDel() { $('delBtn').hidden = !state.media || state.media.kind === 'sample'; disarmDel(); }
+  $('delBtn').addEventListener('click', function () {
+    if (state.exporting) return;
+    if (this.dataset.arm !== '1') {
+      this.dataset.arm = '1'; this.textContent = 'تأكيد الحذف؟'; this.classList.add('btn-danger');
+      clearTimeout(delTimer); delTimer = setTimeout(disarmDel, 3500); return;
+    }
+    clearTimeout(delTimer); resetMedia();
+    setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
+    say('تم الحذف. ارفع ملف ثاني.', 'ok');
+  });
+
+  /* ---------- start ---------- */
+  updateFilterUI();
+  if (!R) say('متصفحك ما يدعم WebGL المطلوب للفلاتر. استعمل كروم على أندرويد.', 'err');
+  var sample = makeSample();
+  setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
+})();
+</script>
+</body></html>
