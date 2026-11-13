@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl" style="background:#0d1117"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0d1117"><style>:root{color-scheme:dark}html,body{background:#0d1117;margin:0}</style></head><body><title>FLIXO</title>
+<!doctype html><html lang="ar" dir="rtl" style="background:#0d1117"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0d1117"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><style>:root{color-scheme:dark}html,body{background:#0d1117;margin:0}</style></head><body><title>FLIXO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
 <style>
@@ -166,6 +166,7 @@ details.adjust #adjReset { margin-top: 12px; }
 </style>
 
 <main dir="rtl" lang="ar" id="app">
+  <button class="ann" id="inst" type="button" hidden><span class="whale" aria-hidden="true">📲</span><span class="txt"><b>ثبّت FLIXO</b> · كتطبيق على شاشتك</span></button>
   <button class="ann" id="upd" type="button" hidden><span class="whale" aria-hidden="true">🔄</span><span class="txt"></span></button>
   <button class="ann" id="ann" type="button" aria-haspopup="dialog"><span class="whale" aria-hidden="true">🐳</span><span class="txt" id="annTxt"></span><span class="chev" aria-hidden="true">‹</span></button>
   <header>
@@ -302,6 +303,7 @@ details.adjust #adjReset { margin-top: 12px; }
   /* FLIXO version: MAJOR.MINOR.PATCH. PATCH = bug fix, MINOR = new feature, MAJOR = big redesign. Bump here and in the #ver label. */
   /* CHANGELOG: newest first. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.3.0', d: '2026-11-14', title: 'تثبيت FLIXO كتطبيق', items: ['تقدر تثبّت FLIXO على شاشة موبايلك مثل التطبيق، بأيقونة خاصة.', 'يفتح بدون شريط المتصفح، ويفتح الصفحة الأساسية حتى لو النت ضعيف.', 'التحديثات توصل لك تلقائياً وتبقى نفس الرابط.'] },
     { v: '1.2.0', d: '2026-11-13', title: 'تنبيه التحديث التلقائي', items: ['إذا نزل تحديث جديد، تطلع رسالة «يوجد تحديث جديد» بزر يحدّث الصفحة.', 'يفحص عند فتح الصفحة، وكل 5 دقايق، ولما ترجع للتبويب.'] },
     { v: '1.1.1', d: '2026-11-13', title: 'فتح أسرع بدون وميض أبيض', items: ['الصفحة تفتح بخلفية غامقة من أول لحظة بدل شاشة بيضاء.'] },
     { v: '1.1.0', d: '2026-11-13', title: 'شريط التحديثات واسم HERO', items: ['شريط فوق يعرض آخر تحديث، تضغط عليه تشوف كل التحديثات.', 'اسم HERO بالصفحة.', 'رقم الإصدار يتحدث مع كل تحديث.'] },
@@ -327,6 +329,15 @@ details.adjust #adjReset { margin-top: 12px; }
     sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
   } catch (e) {}
+  /* install as an app + offline shell (only on a real web address) */
+  (function () {
+    if (!/^https?:$/.test(location.protocol)) return;
+    var dp = null, ib = document.getElementById('inst');
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dp = e; ib.hidden = false; });
+    ib.addEventListener('click', function () { if (!dp) return; dp.prompt(); dp.userChoice.then(function () { dp = null; ib.hidden = true; }); });
+    window.addEventListener('appinstalled', function () { ib.hidden = true; });
+    if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {} }
+  })();
   /* auto-update notice: only when served from a real web address that also serves version.json */
   (function () {
     if (!/^https?:$/.test(location.protocol)) return;
