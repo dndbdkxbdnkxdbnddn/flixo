@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl" style="background:#0d1117"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0d1117"><title>FLIXO</title><meta name="description" content="FLIXO: فلاتر سينمائية للصور والفيديو، تشتغل على جهازك بدون رفع"><meta property="og:type" content="website"><meta property="og:site_name" content="FLIXO"><meta property="og:title" content="FLIXO"><meta property="og:description" content="فلاتر سينمائية للصور والفيديو، تشتغل على جهازك بدون رفع. by HERO"><meta property="og:image" content="https://dndbdkxbdnkxdbnddn.github.io/flixo/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://dndbdkxbdnkxdbnddn.github.io/flixo/og.png"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><style>:root{color-scheme:dark}html,body{background:#0d1117;margin:0}</style></head><body><title>FLIXO</title>
+<!doctype html><html lang="ar" dir="rtl" style="background:#0d1117"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#0d1117"><title>FLIXO</title><meta name="description" content="FLIXO: فلاتر سينمائية للصور والفيديو، تشتغل على جهازك بدون رفع"><meta property="og:type" content="website"><meta property="og:site_name" content="FLIXO"><meta property="og:title" content="FLIXO"><meta property="og:description" content="فلاتر سينمائية للصور والفيديو، تشتغل على جهازك بدون رفع. by HERO"><meta property="og:image" content="https://dndbdkxbdnkxdbnddn.github.io/flixo/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://dndbdkxbdnkxdbnddn.github.io/flixo/og.png"><script>try{if(localStorage.getItem("flixo_theme")==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#E3D0B4"}}catch(e){}</script><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><style>:root{color-scheme:dark}html,body{background:#0d1117;margin:0}</style></head><body><title>FLIXO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
 <style>
@@ -199,6 +199,19 @@ details.frame > .fbody { display: flex; flex-direction: column; gap: 14px; margi
 header h1 { align-items: center; }
 header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: none; }
 [hidden] { display: none !important; }
+
+/* light theme: beige / orange / mint */
+:root[data-theme="light"] { --bg: #E3D0B4; --surface: #EDDFC8; --surface-2: #D8C3A3; --line: #C4AB88; --fg: #2B1D12; --muted: #6B563F; --accent: #FF7518; --accent-ink: #2B1204; --danger: #D93A3A; --ok: #1E9C72; --mint: #8FE3C0; color-scheme: light; }
+:root[data-theme="light"] header h1 img.logo { mix-blend-mode: normal; background: #000; border-radius: 18px; padding: 4px 8px; }
+:root[data-theme="light"] .ann { background: linear-gradient(90deg, rgba(143,227,192,.6), var(--surface)); }
+:root[data-theme="light"] .ann b { color: #C4540A; }
+:root[data-theme="light"] .chip[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--mint), 0 0 0 4px var(--accent); }
+:root[data-theme="light"] .badge { background: rgba(43,29,18,.78); color: #F5EBDD; }
+:root[data-theme="light"] .stage { background: #7b7b7b; border-color: var(--line); }
+:root[data-theme="light"] .pj img, :root[data-theme="light"] .pj .ph, :root[data-theme="light"] .adm-big div { background: rgba(43,29,18,.06); }
+:root[data-theme="light"] .sheet .card { box-shadow: 0 -8px 30px rgba(43,29,18,.18); }
+:root[data-theme="light"] input[type=range]::-webkit-slider-runnable-track { background: linear-gradient(var(--mint), var(--mint)); }
+.themeb { position: absolute; top: 0; left: 38px; background: none; border: 0; font-size: 18px; opacity: .6; padding: 6px; cursor: pointer; }
 </style>
 
 <main dir="rtl" lang="ar" id="app">
@@ -206,6 +219,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   <button class="ann" id="upd" type="button" hidden><span class="whale" aria-hidden="true">🔄</span><span class="txt"></span></button>
   <button class="ann" id="ann" type="button" aria-haspopup="dialog"><span class="whale" aria-hidden="true">🐳</span><span class="txt" id="annTxt"></span><span class="chev" aria-hidden="true">‹</span></button>
   <header>
+    <button class="themeb" id="themeBtn" type="button" aria-label="تبديل الثيم">☀️</button>
     <button class="lockb" id="lockBtn" type="button" aria-label="لوحة المالك">🔒</button>
     <h1><img class="logo" id="hLogo" alt="FLIXO" role="img"><small class="ver" id="ver" dir="ltr">v1.0.0</small></h1>
     <p class="by">by <b>HERO</b></p>
@@ -395,6 +409,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.9.0', d: '2026-11-14', title: 'ثيم فاتح بالألوان الجديدة', items: ['زر ☀️ فوق يبدّل بين الثيم الغامق والثيم الفاتح (بيجي وبرتقالي ونعناعي).', 'اختيارك ينحفظ. وخلفية المعاينة بالثيم الفاتح رمادية محايدة حتى ما تتأثر ألوان الصورة.'] },
     { v: '1.8.1', d: '2026-11-14', title: 'إصلاح الأزرار', items: ['أزرار الرفع والحفظ والمشاريع صارت تترتب صح على الشاشة، والصفحة ما تصغر.'] },
     { v: '1.8.0', d: '2026-11-14', title: 'المشاريع والمسودات', items: ['زر 💾 حفظ يحفظ مشروعك (الملف مع كل الفلاتر والتعديلات) وترجع له من 📁 مشاريعي.', 'المسودات تنحفظ لحالها بعد ما تعدّل، وترجع لها من تبويب المسودات.', 'كل شي ينحفظ على جهازك بس.'] },
     { v: '1.7.0', priv: true, d: '2026-11-14', title: 'لوحة المالك', items: ['قفل 🔒 بالأعلى يفتح لوحة إحصائيات برمز.'] },
@@ -1858,6 +1873,23 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   var sample = makeSample();
   setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
 })();
+
+  /* ---------- theme (dark / light) ---------- */
+  (function () {
+    var root = document.documentElement, btn = document.getElementById('themeBtn');
+    function apply(t) {
+      if (t === 'light') root.setAttribute('data-theme', 'light'); else root.removeAttribute('data-theme');
+      root.style.background = t === 'light' ? '#E3D0B4' : '#0d1117';
+      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#E3D0B4' : '#0d1117');
+      btn.textContent = t === 'light' ? '🌙' : '☀️';
+    }
+    var cur = 'dark'; try { cur = localStorage.getItem('flixo_theme') === 'light' ? 'light' : 'dark'; } catch (e) {}
+    apply(cur);
+    btn.addEventListener('click', function () {
+      cur = cur === 'light' ? 'dark' : 'light'; apply(cur);
+      try { localStorage.setItem('flixo_theme', cur); } catch (e) {}
+    });
+  })();
 
   /* analytics (counts only) + owner dashboard behind a PIN. The PIN only hides the screen. */
   (function () {
