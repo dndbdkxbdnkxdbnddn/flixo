@@ -352,7 +352,8 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
-    { v: '1.6.1', d: '2026-11-14', title: 'عداد الزوار صار خاص', items: ['عدد الزوار ما يطلع للناس، يطلع لك أنت بس عبر رابط خاص.'] },
+    { v: '1.6.2', d: '2026-11-14', title: 'عداد الزوار خاص بيك', items: ['عدد الزوار ما يطلع للناس، يطلع لك أنت بس عبر رابط خاص.', 'العداد يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
+    { v: '1.6.1', d: '2026-11-14', title: 'إصلاح عداد الزوار', items: ['العداد يظهر دايماً تحت الاسم، وصار يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
     { v: '1.6.1', d: '2026-11-14', title: 'إصلاح عداد الزوار', items: ['العداد يظهر دايماً تحت الاسم، وصار يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
     { v: '1.6.0', d: '2026-11-14', title: 'عداد الزوار', items: ['صار يظهر تحت اسم FLIXO كم شخص دخل الموقع. كل جهاز ينحسب مرة وحدة.'] },
     { v: '1.5.3', d: '2026-11-14', title: 'صورة الموقع عند المشاركة', items: ['لما تبعث رابط FLIXO بواتساب أو تلجرام، تطلع صورة شعارك مع الاسم والوصف.', 'أيقونة تبويب المتصفح والتطبيق صارت حرف F.'] },
@@ -1681,25 +1682,33 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
 })();
 
-  /* visitor counter: counts once per device; only shown to the owner via #hero link */
+  /* visitor counter: one count per device; tries several free services; shown only to the owner via #hero link */
   (function () {
     if (!/^https?:$/.test(location.protocol)) return;
-    var admin = location.hash === '#hero', box = document.getElementById('vis'), seen = false;
-    var base = 'https://api.counterapi.dev/v1/flixo-hero/visitors/';
+    var admin = location.hash === '#hero', seen = false;
     try { seen = !!localStorage.getItem('flixo_counted'); } catch (e) {}
-    function show(t) { if (admin) { box.innerHTML = t; box.hidden = false; } }
-    function go(path, retry) {
-      fetch(base + path, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) {
-        var n = j && (j.count != null ? j.count : j.value);
-        if (typeof n !== 'number') throw new Error('bad');
-        try { localStorage.setItem('flixo_counted', '1'); } catch (e) {}
-        show('👥 <b>' + n.toLocaleString('en-US') + '</b> شخص دخلوا FLIXO');
-      }).catch(function (e) {
-        if (retry && path === '') return go('up', false);
-        show('⚠️ تعذر قراءة العداد (' + (e && e.message) + ')');
+    var vis = document.getElementById('vis'), out = document.getElementById('visN');
+    if (admin) { vis.hidden = false; out.textContent = '…'; }
+    function get(url) {
+      var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 8000);
+      return fetch(url, { cache: 'no-store', signal: c.signal }).then(function (r) {
+        clearTimeout(t); if (!r.ok) throw 0; return r.json();
+      }).then(function (j) {
+        var n = j && (j.value != null ? j.value : (j.count != null ? j.count : (j.data && j.data.up_count)));
+        if (typeof n !== 'number') throw 0; return n;
       });
     }
-    go(seen ? '' : 'up', true);
+    var tries = [
+      function (up) { return get('https://abacus.jasoncameron.dev/' + (up ? 'hit' : 'get') + '/flixo-hero/visitors'); },
+      function (up) { return get('https://api.counterapi.dev/v1/flixo-hero/visitors/' + (up ? 'up' : '')); }
+    ];
+    (function go(i) {
+      if (i >= tries.length) { if (admin) out.textContent = '؟'; return; }
+      tries[i](!seen).then(function (n) {
+        try { localStorage.setItem('flixo_counted', '1'); } catch (e) {}
+        if (admin) out.textContent = n.toLocaleString('en-US');
+      }).catch(function () { go(i + 1); });
+    })(0);
   })();
 </script>
 </body></html>
