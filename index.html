@@ -165,6 +165,16 @@ details.adjust #adjReset { margin-top: 12px; }
 .sheet li { margin: 3px 0; }
 header { position: relative; }
 .lockb { position: absolute; top: 0; left: 0; background: none; border: 0; font-size: 18px; opacity: .45; padding: 6px; cursor: pointer; }
+.ptabs { display: flex; gap: 8px; margin-bottom: 10px; }
+.ptabs .btn { flex: 1; opacity: .6; }
+.ptabs .btn.on { opacity: 1; border-color: var(--accent); color: var(--accent); }
+.pj { display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--line); padding: 10px 0; }
+.pj img, .pj .ph { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; background: rgba(255,255,255,.06); flex: none; }
+.pj .mt { flex: 1; min-width: 0; }
+.pj .mt b { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pj .mt span { font-size: 12px; color: var(--muted); }
+.pj .bt { display: flex; flex-direction: column; gap: 6px; }
+.pj .bt button { padding: 6px 12px; font-size: 13px; min-height: 0; }
 .adm-pin { width: 100%; box-sizing: border-box; font-size: 22px; text-align: center; letter-spacing: .3em; padding: 10px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
 .adm-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .adm-big div { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
@@ -206,6 +216,8 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     <button class="btn btn-primary" id="pickBtn" type="button">ارفع صورة أو فيديو</button>
     <input class="sr" id="file" type="file" accept="image/*,video/*" tabindex="-1">
     <button class="btn btn-ghost" id="delBtn" type="button" hidden>حذف</button>
+    <button class="btn btn-ghost" id="saveBtn" type="button" hidden>💾 حفظ</button>
+    <button class="btn btn-ghost" id="prjBtn" type="button">📁 مشاريعي</button>
   </div>
   <div class="status" id="status" role="status" aria-live="polite"></div>
 
@@ -353,6 +365,16 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   </div>
 </div>
 
+<div class="sheet" id="prj" hidden role="dialog" aria-modal="true" dir="rtl">
+  <div class="card">
+    <h2>📁 مشاريعي</h2>
+    <p class="sub">كل شي ينحفظ على جهازك بس، ما ينرفع لأي مكان.</p>
+    <div class="ptabs"><button class="btn on" id="tabP" type="button">المشاريع</button><button class="btn" id="tabD" type="button">المسودات</button></div>
+    <div id="prjList"></div>
+    <button class="btn" id="prjClose" type="button">إغلاق</button>
+  </div>
+</div>
+
 <div class="sheet" id="adm" hidden role="dialog" aria-modal="true" dir="rtl">
   <div class="card">
     <h2>🔒 لوحة HERO</h2>
@@ -372,6 +394,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.8.0', d: '2026-11-14', title: 'المشاريع والمسودات', items: ['زر 💾 حفظ يحفظ مشروعك (الملف مع كل الفلاتر والتعديلات) وترجع له من 📁 مشاريعي.', 'المسودات تنحفظ لحالها بعد ما تعدّل، وترجع لها من تبويب المسودات.', 'كل شي ينحفظ على جهازك بس.'] },
     { v: '1.7.0', priv: true, d: '2026-11-14', title: 'لوحة المالك', items: ['قفل 🔒 بالأعلى يفتح لوحة إحصائيات برمز.'] },
     { v: '1.6.3', priv: true, d: '2026-11-14', title: 'الإعلانات العامة فقط', items: ['التغييرات الخاصة ما تنعرض بالشريط العلوي.'] },
     { v: '1.6.2', priv: true, d: '2026-11-14', title: 'عداد الزوار خاص بيك', items: ['عدد الزوار ما يطلع للناس، يطلع لك أنت بس عبر رابط خاص.', 'العداد يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
@@ -992,6 +1015,9 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     if (isVid) { trim.a = 0; trim.b = 1000; updateTrimUI(); }
     state.autoIdx = 0; autoSnap = null; $('autoNote').hidden = true; $('autoUndo').hidden = true;
     buildThumbs(); redraw(); updateEstimate(); updateDel();
+    if (m.kind === 'sample') { state.curFile = null; state.pid = null; }
+    $('saveBtn').hidden = !state.curFile;
+    if (state.pendingRestore) { var pr = state.pendingRestore; state.pendingRestore = null; try { applyRestore(pr); } catch (e) { say('ما كدرت أرجّع كل الإعدادات.', 'err'); } }
   }
 
   $('pickBtn').addEventListener('click', function () { $('file').click(); });
@@ -999,6 +1025,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     var inp = this, f = inp.files && inp.files[0];
     if (!f) { say('ما انختار ملف. جرّب مرة ثانية.', 'err'); return; }
     if (window.FX) FX.t('upload');
+    state.pid = null; state.dirty = false;
     var nm = f.name || '', ty = f.type || ''; try { inp.value = ''; } catch (e) {}
     if (!ty) {
       var ex = (nm.split('.').pop() || '').toLowerCase();
@@ -1023,6 +1050,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   }
 
   function loadImage(file) {
+    state.curFile = file;
     resetMedia(); say('جاري تحميل الصورة...');
     var img = new Image(); var u = track(URL.createObjectURL(file));
     img.onload = function () {
@@ -1034,6 +1062,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   }
 
   function loadVideo(file) {
+    state.curFile = file;
     resetMedia(); say('جاري تحميل الفيديو...');
     var v = document.createElement('video');
     v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'metadata';
@@ -1685,6 +1714,126 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     state.autoIdx = 0; updateFilterUI(); redraw(); updateEstimate();
     $('autoNote').hidden = true; this.hidden = true;
   });
+
+  /* ---------- drafts + saved projects (IndexedDB, on this device only) ---------- */
+  var DBP = null, draftTimer = 0;
+  function pdb() {
+    if (DBP) return DBP;
+    DBP = new Promise(function (res, rej) {
+      var q = indexedDB.open('flixo', 1);
+      q.onupgradeneeded = function () { q.result.createObjectStore('meta', { keyPath: 'id' }); q.result.createObjectStore('blobs'); };
+      q.onsuccess = function () { res(q.result); }; q.onerror = function () { rej(q.error); };
+    });
+    return DBP;
+  }
+  function ptx(stores, fn) {
+    return pdb().then(function (d) {
+      return new Promise(function (res, rej) {
+        var t = d.transaction(stores, 'readwrite'), out = fn(t);
+        t.oncomplete = function () { res(out && out.result !== undefined ? out.result : out); };
+        t.onerror = t.onabort = function () { rej(t.error); };
+      });
+    });
+  }
+  function pall() { return ptx(['meta'], function (t) { return t.objectStore('meta').getAll(); }); }
+  function snapshot() {
+    return { stack: state.stack.map(function (x) { return { id: x.f.id, a: x.a }; }), amount: state.amount, combine: state.combine,
+      raw: JSON.parse(JSON.stringify(adjRaw)), opts: JSON.parse(JSON.stringify(opts)), frame: JSON.parse(JSON.stringify(state.frame)), wm: state.wm,
+      trim: { a: trim.a, b: trim.b } };
+  }
+  function applyRestore(d) {
+    state.combine = !!d.combine; $('combineBtn').setAttribute('aria-pressed', String(state.combine));
+    state.stack = (d.stack || []).map(function (x) { return { f: FILTERS.filter(function (f) { return f.id === x.id; })[0], a: x.a }; }).filter(function (x) { return x.f; });
+    setAmount(d.amount == null ? 1 : d.amount); applyAdjRaw(d.raw || {});
+    if (d.opts) { setSeg('segVRes', d.opts.vres); setSeg('segFps', d.opts.fps); setSeg('segIRes', d.opts.ires); setSeg('segSharp', String(d.opts.sharp)); }
+    if (d.frame) { state.frame = d.frame; state.wm = !!d.wm; syncFrameUI(); fitPreview(); applyFrame(); }
+    if (d.trim && state.media && state.media.kind === 'video') { trim.a = d.trim.a; trim.b = d.trim.b; updateTrimUI(); }
+    updateFilterUI(); redraw(); updateEstimate();
+    state.dirty = false; clearTimeout(draftTimer);
+  }
+  function thumbURL() {
+    try {
+      redraw();
+      var w = 160, h = Math.max(1, Math.round(160 * cv.height / cv.width)), c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(cv, 0, 0, w, h); return c.toDataURL('image/jpeg', .7);
+    } catch (e) { return ''; }
+  }
+  function saveNow(kind, name) {
+    var m = state.media, f = state.curFile; if (!m || !f || state.exporting) return Promise.resolve(false);
+    if (!state.pid) { state.pid = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    var id = state.pid, needBlob = state.blobFor !== id;
+    return ptx(['meta'], function (t) { return t.objectStore('meta').get(id); }).then(function (old) {
+      var meta = { id: id, name: name || (old && old.name) || m.name || 'بدون اسم', kind: kind === 'project' || (old && old.kind === 'project') ? 'project' : 'draft',
+        t: Date.now(), mk: m.kind, size: f.size, thumb: thumbURL(), data: snapshot() };
+      return ptx(['meta', 'blobs'], function (t) { t.objectStore('meta').put(meta); if (needBlob) t.objectStore('blobs').put(f, id); }).then(function () { state.blobFor = id; return meta; });
+    }).then(function (meta) { state.dirty = false; if (meta.kind === 'draft') pruneDrafts(); return true; });
+  }
+  function pruneDrafts() {
+    pall().then(function (all) {
+      var dr = all.filter(function (x) { return x.kind === 'draft'; }).sort(function (a, b) { return b.t - a.t; }).slice(5);
+      if (dr.length) ptx(['meta', 'blobs'], function (t) { dr.forEach(function (x) { t.objectStore('meta').delete(x.id); t.objectStore('blobs').delete(x.id); }); });
+    }).catch(function () {});
+  }
+  function autoDraft() {
+    var f = state.curFile;
+    if (!f || !state.dirty || state.exporting || f.size > 150 * 1048576) return;
+    saveNow('draft').catch(function () {});
+  }
+  function bump(e) {
+    if (!state.curFile || (e && e.target && e.target.closest && e.target.closest('#prj,#adm'))) return;
+    if (e && e.target && e.target.id === 'pickBtn') return;
+    state.dirty = true; clearTimeout(draftTimer); draftTimer = setTimeout(autoDraft, 2500);
+  }
+  ['click', 'input', 'change'].forEach(function (n) { document.addEventListener(n, bump, true); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { clearTimeout(draftTimer); autoDraft(); } });
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+
+  $('saveBtn').addEventListener('click', function () {
+    var m = state.media; if (!m || !state.curFile) return;
+    var nm = window.prompt('اسم المشروع:', (state.pid && state.pname) || (m.name || '').replace(/\.[^.]+$/, '') || 'مشروع');
+    if (nm === null) return; nm = nm.trim() || 'مشروع'; state.pname = nm;
+    saveNow('project', nm).then(function (ok) { if (ok) say('تم حفظ المشروع «' + nm + '». تلكاه بـ 📁 مشاريعي.', 'ok'); })
+      .catch(function () { say('ما كدرت أحفظ. مساحة الجهاز يمكن ممتلئة.', 'err'); });
+  });
+  var ptab = 'project';
+  function dstr(t) { var d = new Date(t); return d.toLocaleDateString('en-GB') + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function renderPrj() {
+    $('tabP').classList.toggle('on', ptab === 'project'); $('tabD').classList.toggle('on', ptab === 'draft');
+    var box = $('prjList'); box.innerHTML = '<p class="sub">…</p>';
+    pall().then(function (all) {
+      var list = all.filter(function (x) { return x.kind === ptab; }).sort(function (a, b) { return b.t - a.t; });
+      if (!list.length) { box.innerHTML = '<p class="sub">' + (ptab === 'project' ? 'ما عندك مشاريع محفوظة. اضغط 💾 حفظ بعد ما تعدّل.' : 'ما في مسودات. المسودة تنحفظ لحالها بعد ما تعدّل.') + '</p>'; return; }
+      box.innerHTML = '';
+      list.forEach(function (x) {
+        var row = document.createElement('div'); row.className = 'pj';
+        var im = x.thumb ? document.createElement('img') : document.createElement('div'); if (x.thumb) im.src = x.thumb; else im.className = 'ph';
+        var mt = document.createElement('div'); mt.className = 'mt';
+        var b = document.createElement('b'); b.textContent = x.name; var sp = document.createElement('span');
+        sp.textContent = (x.mk === 'video' ? 'فيديو' : 'صورة') + ' · ' + (x.size / 1048576).toFixed(1) + ' MB · ' + dstr(x.t); mt.appendChild(b); mt.appendChild(sp);
+        var bt = document.createElement('div'); bt.className = 'bt';
+        var o = document.createElement('button'); o.className = 'btn btn-primary'; o.textContent = 'فتح';
+        var d = document.createElement('button'); d.className = 'btn btn-ghost'; d.textContent = 'حذف';
+        o.onclick = function () { openPrj(x.id); };
+        d.onclick = function () { if (!window.confirm('حذف «' + x.name + '»؟')) return; ptx(['meta', 'blobs'], function (t) { t.objectStore('meta').delete(x.id); t.objectStore('blobs').delete(x.id); }).then(renderPrj); if (state.pid === x.id) { state.pid = null; state.blobFor = null; } };
+        bt.appendChild(o); bt.appendChild(d); row.appendChild(im); row.appendChild(mt); row.appendChild(bt); box.appendChild(row);
+      });
+    }).catch(function () { box.innerHTML = '<p class="sub">⚠️ التخزين مو متاح بهذا المتصفح (يمكن تصفح خاص).</p>'; });
+  }
+  function openPrj(id) {
+    if (state.exporting) return;
+    Promise.all([ptx(['meta'], function (t) { return t.objectStore('meta').get(id); }), ptx(['blobs'], function (t) { return t.objectStore('blobs').get(id); })]).then(function (r) {
+      var meta = r[0], blob = r[1]; if (!meta || !blob) { say('الملف مفقود. يمكن انمسح من الجهاز.', 'err'); return; }
+      var file = blob instanceof File ? blob : new File([blob], meta.name, { type: blob.type });
+      $('prj').hidden = true;
+      state.pid = id; state.blobFor = id; state.pname = meta.name; state.pendingRestore = meta.data;
+      try { if (meta.mk === 'video') loadVideo(file); else loadImage(file); } catch (e) { say('ما كدرت أفتح المشروع.', 'err'); }
+    }).catch(function () { say('ما كدرت أفتح المشروع.', 'err'); });
+  }
+  $('prjBtn').addEventListener('click', function () { $('prj').hidden = false; renderPrj(); });
+  $('prjClose').addEventListener('click', function () { $('prj').hidden = true; });
+  $('prj').addEventListener('click', function (e) { if (e.target === $('prj')) $('prj').hidden = true; });
+  $('tabP').addEventListener('click', function () { ptab = 'project'; renderPrj(); });
+  $('tabD').addEventListener('click', function () { ptab = 'draft'; renderPrj(); });
 
   /* ---------- delete the current photo / video ---------- */
   var delTimer = 0;
