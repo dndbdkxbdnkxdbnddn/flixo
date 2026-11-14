@@ -163,6 +163,16 @@ details.adjust #adjReset { margin-top: 12px; }
 .sheet .rel h3 em { font-style: normal; direction: ltr; unicode-bidi: isolate; color: var(--accent); }
 .sheet ul { margin: 0; padding-inline-start: 20px; color: var(--fg); font-size: 14px; }
 .sheet li { margin: 3px 0; }
+header { position: relative; }
+.lockb { position: absolute; top: 0; left: 0; background: none; border: 0; font-size: 18px; opacity: .45; padding: 6px; cursor: pointer; }
+.adm-pin { width: 100%; box-sizing: border-box; font-size: 22px; text-align: center; letter-spacing: .3em; padding: 10px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.adm-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adm-big div { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
+.adm-big b { display: block; font-size: 22px; color: var(--accent); direction: ltr; }
+.adm-big span { font-size: 12px; color: var(--muted); }
+.adm-h { margin: 16px 0 6px; font-size: 15px; }
+.adm-t { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
+.adm-t td, .adm-t th { padding: 6px 4px; border-top: 1px solid var(--line); }
 .sheet .close { margin-top: 14px; width: 100%; }
 
 .ratios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -185,9 +195,10 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   <button class="ann" id="upd" type="button" hidden><span class="whale" aria-hidden="true">🔄</span><span class="txt"></span></button>
   <button class="ann" id="ann" type="button" aria-haspopup="dialog"><span class="whale" aria-hidden="true">🐳</span><span class="txt" id="annTxt"></span><span class="chev" aria-hidden="true">‹</span></button>
   <header>
+    <button class="lockb" id="lockBtn" type="button" aria-label="لوحة المالك">🔒</button>
     <h1><img class="logo" id="hLogo" alt="FLIXO" role="img"><small class="ver" id="ver" dir="ltr">v1.0.0</small></h1>
     <p class="by">by <b>HERO</b></p>
-    <p class="vis" id="vis" hidden>👥 <b id="visN">0</b> شخص دخلوا FLIXO</p>
+    
     <p>49 فلتر سينمائي مقسمة 6 مجموعات، للصور والفيديو. الفيديو لحد 30 دقيقة، وكل شي يشتغل على جهازك بدون ما ينرفع لأي مكان.</p>
   </header>
 
@@ -342,6 +353,15 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   </div>
 </div>
 
+<div class="sheet" id="adm" hidden role="dialog" aria-modal="true" dir="rtl">
+  <div class="card">
+    <h2>🔒 لوحة HERO</h2>
+    <div id="admBody"></div>
+    <button class="btn" id="admClose" type="button">إغلاق</button>
+    <button class="btn" id="admOut" type="button" style="margin-top:8px;width:100%;opacity:.7">تسجيل خروج</button>
+  </div>
+</div>
+
 <script>
 (function () {
   'use strict';
@@ -352,6 +372,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.7.0', priv: true, d: '2026-11-14', title: 'لوحة المالك', items: ['قفل 🔒 بالأعلى يفتح لوحة إحصائيات برمز.'] },
     { v: '1.6.3', priv: true, d: '2026-11-14', title: 'الإعلانات العامة فقط', items: ['التغييرات الخاصة ما تنعرض بالشريط العلوي.'] },
     { v: '1.6.2', priv: true, d: '2026-11-14', title: 'عداد الزوار خاص بيك', items: ['عدد الزوار ما يطلع للناس، يطلع لك أنت بس عبر رابط خاص.', 'العداد يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
     { v: '1.6.1', priv: true, d: '2026-11-14', title: 'إصلاح عداد الزوار', items: ['العداد يظهر دايماً تحت الاسم، وصار يجرب أكثر من خدمة إذا وحدة ما اشتغلت.'] },
@@ -977,6 +998,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   $('file').addEventListener('change', function () {
     var inp = this, f = inp.files && inp.files[0];
     if (!f) { say('ما انختار ملف. جرّب مرة ثانية.', 'err'); return; }
+    if (window.FX) FX.t('upload');
     var nm = f.name || '', ty = f.type || ''; try { inp.value = ''; } catch (e) {}
     if (!ty) {
       var ex = (nm.split('.').pop() || '').toLowerCase();
@@ -1121,6 +1143,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   });
 
   function exportImage() {
+    if (window.FX) FX.t('export');
     var m = state.media, c = document.createElement('canvas'), RR;
     try { RR = new Renderer(c); } catch (e) { say('المتصفح ما يدعم معالجة الصور هنا. استعمل كروم.', 'err'); return; }
     var sp = imgSpec(m), w = Math.min(sp.w, RR.maxTex), h = Math.min(sp.h, RR.maxTex);
@@ -1415,6 +1438,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   }
 
   async function exportVideo() {
+    if (window.FX) FX.t('export');
     var m = state.media, v = m.el; applyFrame();
     try { if (await exportVideoFast()) return; } catch (e) { state.exporting = false; $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; }
     if (!R || !window.MediaRecorder || !cv.captureStream) { say('المتصفح ما يدعم تصدير الفيديو. استعمل كروم.', 'err'); return; }
@@ -1684,33 +1708,92 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
 })();
 
-  /* visitor counter: one count per device; tries several free services; shown only to the owner via #hero link */
+  /* analytics (counts only) + owner dashboard behind a PIN. The PIN only hides the screen. */
   (function () {
-    if (!/^https?:$/.test(location.protocol)) return;
-    var admin = location.hash === '#hero', seen = false;
-    try { seen = !!localStorage.getItem('flixo_counted'); } catch (e) {}
-    var vis = document.getElementById('vis'), out = document.getElementById('visN');
-    if (admin) { vis.hidden = false; out.textContent = '…'; }
-    function get(url) {
+    var NS = 'flixo-hero', HASH = 'f4350b96fcfad66c3fc95dbbabf522ec439d30564304c560d2bc46473b12991e';
+    var SV = [
+      { hit: function (k) { return 'https://abacus.jasoncameron.dev/hit/' + NS + '/' + k; }, get: function (k) { return 'https://abacus.jasoncameron.dev/get/' + NS + '/' + k; } },
+      { hit: function (k) { return 'https://api.counterapi.dev/v1/' + NS + '/' + k + '/up'; }, get: function (k) { return 'https://api.counterapi.dev/v1/' + NS + '/' + k + '/'; } }
+    ];
+    function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
+    function day(off) { return new Date(Date.now() + 3 * 3600e3 - (off || 0) * 864e5).toISOString().slice(0, 10); }
+    function req(url) {
       var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 8000);
       return fetch(url, { cache: 'no-store', signal: c.signal }).then(function (r) {
-        clearTimeout(t); if (!r.ok) throw 0; return r.json();
-      }).then(function (j) {
-        var n = j && (j.value != null ? j.value : (j.count != null ? j.count : (j.data && j.data.up_count)));
-        if (typeof n !== 'number') throw 0; return n;
+        clearTimeout(t);
+        if (r.status === 404 || r.status === 400) return 0;
+        if (!r.ok) throw 0;
+        return r.json().then(function (j) {
+          var n = j && (j.value != null ? j.value : (j.count != null ? j.count : (j.data && j.data.up_count)));
+          if (typeof n !== 'number') throw 0; return n;
+        });
       });
     }
-    var tries = [
-      function (up) { return get('https://abacus.jasoncameron.dev/' + (up ? 'hit' : 'get') + '/flixo-hero/visitors'); },
-      function (up) { return get('https://api.counterapi.dev/v1/flixo-hero/visitors/' + (up ? 'up' : '')); }
-    ];
-    (function go(i) {
-      if (i >= tries.length) { if (admin) out.textContent = '؟'; return; }
-      tries[i](!seen).then(function (n) {
-        try { localStorage.setItem('flixo_counted', '1'); } catch (e) {}
-        if (admin) out.textContent = n.toLocaleString('en-US');
-      }).catch(function () { go(i + 1); });
-    })(0);
+    function call(kind, key) {
+      var i = 0;
+      return (function next() {
+        if (i >= SV.length) return Promise.reject(0);
+        return req(SV[i++][kind](key)).catch(next);
+      })();
+    }
+    var live = /^https?:$/.test(location.protocol);
+    function once(guard, key) {
+      if (!live || ls('flixo_owner') || ls(guard)) return;
+      call('hit', key).then(function () { ls(guard, '1'); }).catch(function () {});
+    }
+    var D = day();
+    once('fx_total', 'visitors');
+    once('fx_v_' + D, 'v-' + D);
+    window.FX = { t: function (ev) {
+      if (!live || ls('flixo_owner')) return;
+      once('fx_a_' + D, 'a-' + D);
+      call('hit', 'ev-' + ev).catch(function () {});
+    } };
+
+    /* ---- owner dashboard ---- */
+    var adm = document.getElementById('adm'), body = document.getElementById('admBody');
+    function sha(t) {
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode('flixo|' + t)).then(function (b) {
+        return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+      });
+    }
+    function fmt(n) { return (n == null ? '؟' : n.toLocaleString('en-US')); }
+    function dash() {
+      body.innerHTML = '<p class="sub">جاري التحميل…</p>';
+      var days = [0, 1, 2, 3, 4, 5, 6].map(day), keys = ['visitors', 'ev-upload', 'ev-export'];
+      days.forEach(function (d) { keys.push('v-' + d, 'a-' + d); });
+      Promise.all(keys.map(function (k) { return call('get', k).catch(function () { return null; }); })).then(function (r) {
+        var m = {}; keys.forEach(function (k, i) { m[k] = r[i]; });
+        if (r.every(function (x) { return x == null; })) { body.innerHTML = '<p class="sub">⚠️ تعذر الاتصال بخدمة العد. جرّب مرة ثانية.</p>'; return; }
+        var h = '<div class="adm-big"><div><b>' + fmt(m.visitors) + '</b><span>إجمالي الأجهزة اللي دخلت</span></div>' +
+          '<div><b>' + fmt(m['v-' + days[0]]) + '</b><span>دخلوا اليوم</span></div>' +
+          '<div><b>' + fmt(m['a-' + days[0]]) + '</b><span>تفاعلوا اليوم</span></div>' +
+          '<div><b>' + fmt(m['v-' + days[1]]) + '</b><span>دخلوا أمس</span></div>' +
+          '<div><b>' + fmt(m['a-' + days[1]]) + '</b><span>تفاعلوا أمس</span></div>' +
+          '<div><b>' + fmt(m['ev-upload']) + ' / ' + fmt(m['ev-export']) + '</b><span>رفع / تصدير (الكل)</span></div></div>' +
+          '<h3 class="adm-h">آخر 7 أيام</h3><table class="adm-t"><tr><th>اليوم</th><th>دخول</th><th>تفاعل</th></tr>';
+        days.forEach(function (d) { h += '<tr><td dir="ltr">' + d + '</td><td>' + fmt(m['v-' + d]) + '</td><td>' + fmt(m['a-' + d]) + '</td></tr>'; });
+        body.innerHTML = h + '</table><p class="sub">الرقم = عدد الأجهزة (مو أشخاص). "تفاعل" = رفع ملف أو تصدير.</p>';
+      });
+    }
+    function login() {
+      body.innerHTML = '<p class="sub">اكتب الرمز</p><input id="admPin" class="adm-pin" type="password" inputmode="numeric" autocomplete="off" dir="ltr"><button class="btn" id="admGo" type="button">فتح</button><p class="sub" id="admErr"></p>';
+      var go = function () {
+        sha(document.getElementById('admPin').value.trim()).then(function (x) {
+          if (x === HASH) { ls('flixo_owner', x); dash(); }
+          else document.getElementById('admErr').textContent = 'الرمز غلط';
+        });
+      };
+      document.getElementById('admGo').onclick = go;
+      document.getElementById('admPin').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+    }
+    document.getElementById('lockBtn').onclick = function () {
+      adm.hidden = false;
+      if (ls('flixo_owner') === HASH) dash(); else login();
+    };
+    document.getElementById('admClose').onclick = function () { adm.hidden = true; };
+    adm.addEventListener('click', function (e) { if (e.target === adm) adm.hidden = true; });
+    document.getElementById('admOut').onclick = function () { try { localStorage.removeItem('flixo_owner'); } catch (e) {} adm.hidden = true; };
   })();
 </script>
 </body></html>
