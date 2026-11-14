@@ -162,6 +162,16 @@ details.adjust #adjReset { margin-top: 12px; }
 .sheet ul { margin: 0; padding-inline-start: 20px; color: var(--fg); font-size: 14px; }
 .sheet li { margin: 3px 0; }
 .sheet .close { margin-top: 14px; width: 100%; }
+
+.ratios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ratios button { min-height: 58px; padding: 6px 4px; border-radius: 12px; background: var(--surface-2); color: var(--fg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.2; }
+.ratios button b { font-size: 16px; direction: ltr; unicode-bidi: isolate; }
+.ratios button small { font-size: 11px; color: var(--muted); }
+.ratios button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); }
+.ratios button[aria-checked="true"] small { color: var(--accent-ink); opacity: .8; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.tools .btn { min-height: 44px; padding: 0 14px; font-size: 15px; }
+details.frame > .fbody { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
 [hidden] { display: none !important; }
 </style>
 
@@ -213,6 +223,35 @@ details.adjust #adjReset { margin-top: 12px; }
     <summary><span>تعديل الصورة<small id="adjCount"></small></span></summary>
     <div class="adjlist" id="adjList"></div>
     <button class="btn btn-ghost" id="adjReset" type="button">إعادة ضبط التعديلات</button>
+  </details>
+
+  <details class="panel adjust frame opts" id="frameBox">
+    <summary><span>القياس والإطار<small id="frameCount"></small></span></summary>
+    <div class="fbody">
+      <div class="field">
+        <div class="flabel">القياس <small class="hint">للستوري والريلز والبوست وغيرها</small></div>
+        <div class="ratios" id="ratios" role="radiogroup" aria-label="القياس"></div>
+      </div>
+      <div class="field">
+        <div class="flabel">طريقة الإطار</div>
+        <div class="seg" id="segFit" role="radiogroup" aria-label="طريقة الإطار">
+          <button type="button" role="radio" data-v="0">قص (يملأ الإطار)</button>
+          <button type="button" role="radio" data-v="1">كامل (حواف سوداء)</button>
+        </div>
+      </div>
+      <div class="adjlist">
+        <div class="slider"><label for="fZoom">تقريب</label><input type="range" id="fZoom" min="100" max="300" value="100"><output id="fZoomO">100%</output></div>
+        <div class="slider"><label for="fPx">تحريك أفقي</label><input type="range" id="fPx" min="-100" max="100" value="0"><output id="fPxO">0</output></div>
+        <div class="slider"><label for="fPy">تحريك عمودي</label><input type="range" id="fPy" min="-100" max="100" value="0"><output id="fPyO">0</output></div>
+      </div>
+      <div class="tools">
+        <button type="button" class="btn btn-ghost" id="rotL">⟲ تدوير يسار</button>
+        <button type="button" class="btn btn-ghost" id="rotR">⟳ تدوير يمين</button>
+        <button type="button" class="btn btn-ghost" id="flipB">⇋ قلب</button>
+        <button type="button" class="btn btn-ghost" id="frameReset">إعادة ضبط</button>
+      </div>
+      <div class="combo"><button type="button" class="toggle" id="wmBtn" aria-pressed="true">علامة FLIXO على الناتج</button><span class="hint">تظهر زاوية الصورة أو الفيديو</span></div>
+    </div>
   </details>
 
   <div class="panel">
@@ -303,6 +342,7 @@ details.adjust #adjReset { margin-top: 12px; }
   /* FLIXO version: MAJOR.MINOR.PATCH. PATCH = bug fix, MINOR = new feature, MAJOR = big redesign. Bump here and in the #ver label. */
   /* CHANGELOG: newest first. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.4.0', d: '2026-11-14', title: 'قياسات القص والإطار + علامة FLIXO', items: ['14 قياس جاهز: ستوري وريلز وتيك توك 9:16، بوست 4:5 ومربع، يوتيوب 16:9، سينمائي 21:9 و 2.39:1 وغيرها.', 'قص يملأ الإطار، أو كامل بحواف سوداء، مع تقريب وتحريك.', 'تدوير وقلب للصورة والفيديو.', 'علامة FLIXO صغيرة على الناتج (تقدر تطفيها).', 'زر مشاركة بعد التصدير.'] },
     { v: '1.3.0', d: '2026-11-14', title: 'تثبيت FLIXO كتطبيق', items: ['تقدر تثبّت FLIXO على شاشة موبايلك مثل التطبيق، بأيقونة خاصة.', 'يفتح بدون شريط المتصفح، ويفتح الصفحة الأساسية حتى لو النت ضعيف.', 'التحديثات توصل لك تلقائياً وتبقى نفس الرابط.'] },
     { v: '1.2.0', d: '2026-11-13', title: 'تنبيه التحديث التلقائي', items: ['إذا نزل تحديث جديد، تطلع رسالة «يوجد تحديث جديد» بزر يحدّث الصفحة.', 'يفحص عند فتح الصفحة، وكل 5 دقايق، ولما ترجع للتبويب.'] },
     { v: '1.1.1', d: '2026-11-13', title: 'فتح أسرع بدون وميض أبيض', items: ['الصفحة تفتح بخلفية غامقة من أول لحظة بدل شاشة بيضاء.'] },
@@ -435,6 +475,7 @@ details.adjust #adjReset { margin-top: 12px; }
     '#ifdef GL_FRAGMENT_PRECISION_HIGH', 'precision highp float;', '#else', 'precision mediump float;', '#endif',
     'varying vec2 v;uniform sampler2D t,t2;',
     'uniform vec3 uSlope[3],uPow[3],uSh[3],uHi[3];uniform vec4 uP[3];uniform vec3 uAmtL;',
+    'uniform vec4 uFr;uniform vec3 uFr2;float inb;',
     'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed;uniform vec2 uTex;',
     'float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}',
     'vec3 S(vec2 p){vec3 a=texture2D(t,p).rgb;if(uMix>0.){a=mix(a,texture2D(t2,p).rgb,uMix);}return a;}',
@@ -445,8 +486,10 @@ details.adjust #adjReset { margin-top: 12px; }
     ' l=clamp(lum(c),0.,1.);c+=sh*(1.-l)*(1.-l)+hi*l*l*.6;c=c*(1.-p.z)+p.z;',
     ' vec2 q=v-.5;q.x*=uAsp;c*=1.-p.w*smoothstep(.25,.85,length(q));',
     ' return mix(o,clamp(c,0.,1.),amt);}',
-    'void main(){vec3 o=S(v);',
-    ' if(uSharp>0.){vec3 bl=(S(v+vec2(uTex.x,0.))+S(v-vec2(uTex.x,0.))+S(v+vec2(0.,uTex.y))+S(v-vec2(0.,uTex.y)))*.25;o=clamp(o+(o-bl)*uSharp,0.,1.);}',
+    'vec2 M(vec2 o){vec2 s=vec2(uFr.z,uFr.w)+(o-.5)*uFr.xy;if(uFr2.y>.5)s.x=1.-s.x;inb=1.;if(uFr2.z>.5&&(s.x<0.||s.x>1.||s.y<0.||s.y>1.))inb=0.;',
+    ' if(uFr2.x<.5)return s;if(uFr2.x<1.5)return vec2(s.y,1.-s.x);if(uFr2.x<2.5)return vec2(1.-s.x,1.-s.y);return vec2(1.-s.y,s.x);}',
+    'void main(){vec2 su=M(v);vec3 o=S(su);',
+    ' if(uSharp>0.){vec3 bl=(S(su+vec2(uTex.x,0.))+S(su-vec2(uTex.x,0.))+S(su+vec2(0.,uTex.y))+S(su-vec2(0.,uTex.y)))*.25;o=clamp(o+(o-bl)*uSharp,0.,1.);}',
     ' vec3 c=o*exp2(uBri);c.r+=uTemp*.1;c.b-=uTemp*.1;c.g+=uTint*.08;c.r-=uTint*.04;c.b-=uTint*.04;',
     ' float l=lum(c);c+=uShA*(1.-smoothstep(0.,.6,l))*.25+uHiA*smoothstep(.4,1.,l)*.25;',
     ' c=(c-.5)*uCon2+.5;float l2=lum(c);c=mix(vec3(l2),c,uSat2);',
@@ -458,7 +501,7 @@ details.adjust #adjReset { margin-top: 12px; }
     ' vec2 q=v-.5;q.x*=uAsp;c*=1.-uVigA*smoothstep(.25,.85,length(q));',
     ' float n=fract(sin(dot(floor(gl_FragCoord.xy/uGs)+uSeed,vec2(12.9898,78.233)))*43758.5453);',
     ' c+=(n-.5)*uGrain*.35;',
-    ' gl_FragColor=vec4(clamp(c,0.,1.),1.);}'
+    ' gl_FragColor=vec4(clamp(c,0.,1.)*inb,1.);}'
   ].join('\n');
 
   function Renderer(canvas) {
@@ -489,8 +532,42 @@ details.adjust #adjReset { margin-top: 12px; }
     gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 't2'), 1);
     var U = {};
     ['uSlope', 'uPow', 'uSh', 'uHi', 'uP'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n + '[0]'); });
-    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uTex'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uTex', 'uFr', 'uFr2'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
     this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    var FR = { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }, wmOn = false, wmReady = false, wmTex, wmPr, wmU = {}, wmLoc;
+    this.setFrame = function (f) { FR = f || { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }; };
+    function initWm() {
+      var c = document.createElement('canvas'); c.width = 512; c.height = 128;
+      var x = c.getContext('2d');
+      x.font = '800 86px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      try { x.letterSpacing = '8px'; } catch (e) {}
+      x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 10; x.shadowOffsetY = 2;
+      x.fillStyle = '#ffffff'; x.fillText('FLIXO', 260, 68);
+      wmTex = gl.createTexture(); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, wmTex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+      var v2 = 'attribute vec2 p;uniform vec4 r;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(mix(r.x,r.z,p.x*.5+.5),mix(r.y,r.w,p.y*.5+.5),0.,1.);}';
+      var f2 = 'precision mediump float;varying vec2 u;uniform sampler2D t;uniform float o;void main(){vec4 c=texture2D(t,u);gl_FragColor=vec4(c.rgb,c.a*o);}';
+      wmPr = gl.createProgram(); gl.attachShader(wmPr, sh(gl.VERTEX_SHADER, v2)); gl.attachShader(wmPr, sh(gl.FRAGMENT_SHADER, f2)); gl.linkProgram(wmPr);
+      wmLoc = gl.getAttribLocation(wmPr, 'p'); wmU.r = gl.getUniformLocation(wmPr, 'r'); wmU.t = gl.getUniformLocation(wmPr, 't'); wmU.o = gl.getUniformLocation(wmPr, 'o');
+      wmReady = true;
+    }
+    this.setWm = function (on) { wmOn = !!on; };
+    function drawWm(w, h) {
+      if (!wmOn) return;
+      if (!wmReady) { try { initWm(); } catch (e) { wmOn = false; return; } }
+      var m = Math.min(w, h), ww = m * .26, hh = ww / 4, mg = m * .035;
+      var x1 = w - mg, x0 = x1 - ww;
+      gl.useProgram(wmPr); gl.enableVertexAttribArray(wmLoc); gl.vertexAttribPointer(wmLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, wmTex);
+      gl.uniform1i(wmU.t, 2); gl.uniform1f(wmU.o, .82);
+      gl.uniform4f(wmU.r, x0 / w * 2 - 1, -1 + 2 * mg / h, x1 / w * 2 - 1, -1 + 2 * (mg + hh) / h);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.disable(gl.BLEND); gl.useProgram(pr);
+    }
     // upload = push a new source frame (the old one becomes "previous", used for frame blending)
     this.upload = function (src) {
       var tmp = texPrev; texPrev = texCur; texCur = tmp;
@@ -524,7 +601,9 @@ details.adjust #adjReset { margin-top: 12px; }
       gl.uniform1f(U.uHiA, ad.hi || 0); gl.uniform1f(U.uShA, ad.sh || 0); gl.uniform1f(U.uFadeA, ad.fade || 0);
       gl.uniform1f(U.uVigA, ad.vig || 0); gl.uniform1f(U.uGrain, ad.grain || 0);
       gl.uniform1f(U.uGs, Math.max(1, w / 1280)); gl.uniform1f(U.uSeed, Math.random() * 100);
+      gl.uniform4f(U.uFr, FR.vx, FR.vy, FR.cx, FR.cy); gl.uniform3f(U.uFr2, FR.rot, FR.flip, FR.fit);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      drawWm(w, h);
     };
     this.render = function (src, stack, ad, w, h, sharp) { if (this.upload(src)) this.draw(stack, ad, w, h, sharp, 0); };
     this.dispose = function () { var e = gl.getExtension('WEBGL_lose_context'); if (e) e.loseContext(); };
@@ -534,9 +613,38 @@ details.adjust #adjReset { margin-top: 12px; }
   var cv = $('cv'), thumbCv = document.createElement('canvas');
   thumbCv.width = 144; thumbCv.height = 144;
   var R = null, T = null;
-  try { R = new Renderer(cv); T = new Renderer(thumbCv); } catch (e) { R = null; T = null; }
+  try { R = new Renderer(cv); T = new Renderer(thumbCv); } catch (e) { R = null; T = null; try { console.error("GLERR " + (e && e.message)); } catch (x) {} }
 
   var state = { stack: [], combine: false, amount: 1, showOrig: false, media: null, exporting: false, cancelled: false };
+  state.frame = { ratio: null, rot: 0, flip: 0, fit: 0, zoom: 1, px: 0, py: 0 };
+  state.wm = true;
+  var RATIOS = [
+    { r: null, t: 'الأصلي', s: 'بدون قص' },
+    { r: [9, 16], t: '9:16', s: 'ستوري · ريلز · تيك توك' },
+    { r: [4, 5], t: '4:5', s: 'بوست انستا' },
+    { r: [1, 1], t: '1:1', s: 'مربع' },
+    { r: [3, 4], t: '3:4', s: 'بوست عمودي' },
+    { r: [2, 3], t: '2:3', s: 'بنترست' },
+    { r: [16, 9], t: '16:9', s: 'يوتيوب · عرضي' },
+    { r: [4, 3], t: '4:3', s: 'كلاسيك' },
+    { r: [3, 2], t: '3:2', s: 'كاميرا' },
+    { r: [5, 4], t: '5:4', s: 'طباعة' },
+    { r: [21, 9], t: '21:9', s: 'سينمائي واسع' },
+    { r: [239, 100], t: '2.39:1', s: 'سينما' },
+    { r: [191, 100], t: '1.91:1', s: 'فيسبوك · لينكدن' },
+    { r: [3, 1], t: '3:1', s: 'غلاف X' }
+  ];
+  function frameInfo(m) {
+    var f = state.frame, odd = f.rot % 2 === 1, rw = odd ? m.h : m.w, rh = odd ? m.w : m.h;
+    var r = f.ratio ? f.ratio[0] / f.ratio[1] : rw / rh, cw, ch;
+    if (!f.fit) { if (rw / rh > r) { ch = rh; cw = rh * r; } else { cw = rw; ch = rw / r; } }
+    else { if (rw / rh > r) { cw = rw; ch = rw / r; } else { ch = rh; cw = rh * r; } }
+    var vx = cw / rw / f.zoom, vy = ch / rh / f.zoom;
+    var rx = Math.abs(.5 - vx / 2), ry = Math.abs(.5 - vy / 2);
+    return { w: Math.max(2, Math.round(cw)), h: Math.max(2, Math.round(ch)), fr: { vx: vx, vy: vy, cx: .5 + f.px * rx, cy: .5 + f.py * ry, rot: f.rot, flip: f.flip, fit: f.fit } };
+  }
+  function applyFrame() { var m = state.media; if (R && m) { R.setFrame(frameInfo(m).fr); R.setWm(state.wm && !state.showOrig); } }
+  function fitPreview() { var m = state.media; if (!m) return; var fd = frameInfo(m); sizeCanvas(fd.w, fd.h, m.kind === 'video' ? 960 : 1280); }
   var NOADJ = { bri: 0, con: 1, sat: 1, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
   var adjRaw = { bri: 0, con: 0, sat: 0, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
   var adj = NOADJ;
@@ -689,7 +797,7 @@ details.adjust #adjReset { margin-top: 12px; }
   /* ---------- preview ---------- */
   function redraw() {
     var m = state.media; if (!m || !R || state.exporting) return;
-    var orig = state.showOrig;
+    var orig = state.showOrig; applyFrame();
     R.render(m.src, orig ? [] : stackAmt(), orig ? NOADJ : adj, cv.width, cv.height, orig ? 0 : opts.sharp);
     $('badge').className = 'badge' + (state.showOrig ? ' orig' : '');
     if (state.showOrig) { $('badge').textContent = 'الأصل'; $('badge').hidden = false; }
@@ -727,8 +835,10 @@ details.adjust #adjReset { margin-top: 12px; }
   function resLabel(v) { return v >= 2160 ? '4K' : v >= 1440 ? '2K' : v + 'p'; }
 
   function outSpec(m) {
-    var short = Math.min(m.w, m.h), Tt = opts.vres || short, sc = Tt / short;
-    var w = Math.max(2, Math.round(m.w * sc / 2) * 2), h = Math.max(2, Math.round(m.h * sc / 2) * 2);
+    var fd = frameInfo(m), short = Math.min(fd.w, fd.h), Tt = opts.vres || short, sc = Tt / short;
+    var w = Math.max(2, Math.round(fd.w * sc / 2) * 2), h = Math.max(2, Math.round(fd.h * sc / 2) * 2);
+    var fr0 = state.frame.ratio;
+    if (fr0) { var rr = fr0[0] / fr0[1]; if (rr < 1) h = Math.max(2, Math.round(w / rr / 2) * 2); else w = Math.max(2, Math.round(h * rr / 2) * 2); }
     var cap = Math.min(R ? R.maxTex : 4096, 5120);
     if (Math.max(w, h) > cap) { var k = cap / Math.max(w, h); w = Math.round(w * k / 2) * 2; h = Math.round(h * k / 2) * 2; }
     var fps = opts.fps;
@@ -736,10 +846,12 @@ details.adjust #adjReset { margin-top: 12px; }
     return { w: w, h: h, fps: fps, bps: bps };
   }
   function imgSpec(m) {
-    var long = Math.max(m.w, m.h), target = opts.ires || long;
+    var fd = frameInfo(m), long = Math.max(fd.w, fd.h), target = opts.ires || long;
     target = Math.min(target, Math.min(R ? R.maxTex : 4096, 8192));
     var s = target / long;
-    return { w: Math.max(2, Math.round(m.w * s)), h: Math.max(2, Math.round(m.h * s)), up: target > long };
+    var iw = Math.max(2, Math.round(fd.w * s)), ih = Math.max(2, Math.round(fd.h * s)), fr0 = state.frame.ratio;
+    if (fr0) { var rr = fr0[0] / fr0[1]; if (rr < 1) iw = Math.max(2, Math.round(ih * rr)); else ih = Math.max(2, Math.round(iw / rr)); }
+    return { w: iw, h: ih, up: target > long };
   }
 
   function updateEstimate() {
@@ -791,6 +903,41 @@ details.adjust #adjReset { margin-top: 12px; }
     v.play().then(function () { timer = setTimeout(finish, 2500); }).catch(finish);
   }
 
+  /* ---------- frame / size panel ---------- */
+  var ratioBtns = [];
+  (function () {
+    var box = $('ratios');
+    RATIOS.forEach(function (x, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio');
+      var t = document.createElement('b'); t.textContent = x.t; var sm = document.createElement('small'); sm.textContent = x.s;
+      b.appendChild(t); b.appendChild(sm);
+      b.addEventListener('click', function () { state.frame.ratio = x.r; syncFrameUI(); frameChanged(); });
+      box.appendChild(b); ratioBtns.push(b);
+    });
+  })();
+  function frameChanged() { fitPreview(); updateEstimate(); redraw(); }
+  function syncFrameUI() {
+    var f = state.frame;
+    ratioBtns.forEach(function (b, i) { var x = RATIOS[i].r; b.setAttribute('aria-checked', String(f.ratio ? (x && x[0] === f.ratio[0] && x[1] === f.ratio[1]) : !x)); });
+    [].forEach.call($('segFit').querySelectorAll('button'), function (b) { b.setAttribute('aria-checked', String(parseInt(b.dataset.v, 10) === f.fit)); });
+    $('fZoom').value = Math.round(f.zoom * 100); $('fZoomO').textContent = Math.round(f.zoom * 100) + '%';
+    $('fPx').value = Math.round(f.px * 100); $('fPxO').textContent = Math.round(f.px * 100);
+    $('fPy').value = Math.round(f.py * 100); $('fPyO').textContent = Math.round(f.py * 100);
+    $('wmBtn').setAttribute('aria-pressed', String(state.wm));
+    var n = (f.ratio ? 1 : 0) + (f.rot ? 1 : 0) + (f.flip ? 1 : 0) + (f.zoom > 1 ? 1 : 0) + (f.px || f.py ? 1 : 0);
+    $('frameCount').textContent = n ? ' · ' + n : '';
+  }
+  [].forEach.call($('segFit').querySelectorAll('button'), function (b) { b.addEventListener('click', function () { state.frame.fit = parseInt(b.dataset.v, 10); syncFrameUI(); frameChanged(); }); });
+  $('fZoom').addEventListener('input', function () { state.frame.zoom = this.value / 100; syncFrameUI(); redraw(); updateEstimate(); });
+  $('fPx').addEventListener('input', function () { state.frame.px = this.value / 100; syncFrameUI(); redraw(); });
+  $('fPy').addEventListener('input', function () { state.frame.py = this.value / 100; syncFrameUI(); redraw(); });
+  $('rotL').addEventListener('click', function () { state.frame.rot = (state.frame.rot + 3) % 4; syncFrameUI(); frameChanged(); });
+  $('rotR').addEventListener('click', function () { state.frame.rot = (state.frame.rot + 1) % 4; syncFrameUI(); frameChanged(); });
+  $('flipB').addEventListener('click', function () { state.frame.flip = state.frame.flip ? 0 : 1; syncFrameUI(); redraw(); });
+  $('frameReset').addEventListener('click', function () { state.frame = { ratio: null, rot: 0, flip: 0, fit: 0, zoom: 1, px: 0, py: 0 }; syncFrameUI(); frameChanged(); });
+  $('wmBtn').addEventListener('click', function () { state.wm = !state.wm; syncFrameUI(); redraw(); });
+  syncFrameUI();
+
   /* ---------- loading media ---------- */
   function setMedia(m) {
     state.media = m;
@@ -798,7 +945,8 @@ details.adjust #adjReset { margin-top: 12px; }
     $('player').hidden = !isVid; $('qVideo').hidden = !isVid; $('qImage').hidden = isVid; $('vidNote').hidden = !isVid;
     $('exportBtn').textContent = isVid ? 'طبّق الفلتر وصدّر الفيديو' : 'طبّق الفلتر وحمّل الصورة';
     $('result').hidden = true; $('result').innerHTML = '';
-    sizeCanvas(m.w, m.h, isVid ? 960 : 1280);
+    state.frame = { ratio: state.frame.ratio, rot: 0, flip: 0, fit: state.frame.fit, zoom: 1, px: 0, py: 0 }; syncFrameUI();
+    fitPreview();
     if (isVid) { trim.a = 0; trim.b = 1000; updateTrimUI(); }
     state.autoIdx = 0; autoSnap = null; $('autoNote').hidden = true; $('autoUndo').hidden = true;
     buildThumbs(); redraw(); updateEstimate(); updateDel();
@@ -931,7 +1079,16 @@ details.adjust #adjReset { margin-top: 12px; }
     var d = document.createElement('button');
     d.type = 'button'; d.className = 'btn btn-ghost'; d.textContent = 'حذف النتيجة';
     d.addEventListener('click', function () { r.hidden = true; r.innerHTML = ''; try { URL.revokeObjectURL(u); } catch (e) {} say('تم حذف النتيجة.', 'ok'); });
-    r.appendChild(el); r.appendChild(b); r.appendChild(d);
+    r.appendChild(el); r.appendChild(b);
+    try {
+      var sf = new File([blob], filename, { type: blob.type || (isVideo ? 'video/mp4' : 'image/jpeg') });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [sf] })) {
+        var sb = document.createElement('button'); sb.type = 'button'; sb.className = 'btn btn-ghost'; sb.textContent = 'مشاركة';
+        sb.addEventListener('click', function () { navigator.share({ files: [sf], title: 'FLIXO' }).catch(function () {}); });
+        r.appendChild(sb);
+      }
+    } catch (e) {}
+    r.appendChild(d);
     r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -946,6 +1103,7 @@ details.adjust #adjReset { margin-top: 12px; }
     var m = state.media, c = document.createElement('canvas'), RR;
     try { RR = new Renderer(c); } catch (e) { say('المتصفح ما يدعم معالجة الصور هنا. استعمل كروم.', 'err'); return; }
     var sp = imgSpec(m), w = Math.min(sp.w, RR.maxTex), h = Math.min(sp.h, RR.maxTex);
+    RR.setFrame(frameInfo(m).fr); RR.setWm(state.wm);
     RR.render(m.src, stackAmt(), adj, w, h, opts.sharp);
     c.toBlob(function (blob) {
       RR.dispose();
@@ -1050,7 +1208,7 @@ details.adjust #adjReset { margin-top: 12px; }
 
   /* ---------- fast export: WebCodecs, every frame stamped with its real time (smooth even when the phone is slow) ---------- */
   async function exportVideoFast() {
-    var m = state.media, v = m.el, file = m.file;
+    var m = state.media, v = m.el, file = m.file; applyFrame();
     if (!file || !window.VideoEncoder || !window.VideoFrame || !v.requestVideoFrameCallback) return false;
     var o = outSpec(m), w = o.w, h = o.h, fps = o.fps, bps = Math.round(o.bps);
     var tr = trimRange(m), startT = tr.s, endT = tr.d ? tr.e : (v.duration || 0), spanT = Math.max(.1, endT - startT);
@@ -1098,7 +1256,7 @@ details.adjust #adjReset { margin-top: 12px; }
       try { v.pause(); v.muted = wasMuted; v.playbackRate = 1; } catch (e) {}
       $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; updateEstimate();
       $('bar').style.width = '0%';
-      sizeCanvas(m.w, m.h, 960); redraw();
+      fitPreview(); redraw();
       if (msg) say(msg, ok ? 'ok' : 'err');
     }
 
@@ -1236,7 +1394,7 @@ details.adjust #adjReset { margin-top: 12px; }
   }
 
   async function exportVideo() {
-    var m = state.media, v = m.el;
+    var m = state.media, v = m.el; applyFrame();
     try { if (await exportVideoFast()) return; } catch (e) { state.exporting = false; $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; }
     if (!R || !window.MediaRecorder || !cv.captureStream) { say('المتصفح ما يدعم تصدير الفيديو. استعمل كروم.', 'err'); return; }
     var o = outSpec(m), w = o.w, h = o.h, fps = o.fps, bps = o.bps;
@@ -1281,7 +1439,7 @@ details.adjust #adjReset { margin-top: 12px; }
       if (audio) audio.mon.gain.value = 1;
       $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; updateEstimate();
       $('bar').style.width = '0%';
-      sizeCanvas(m.w, m.h, 960); redraw();
+      fitPreview(); redraw();
       if (msg) say(msg, ok ? 'ok' : 'err');
     }
 
