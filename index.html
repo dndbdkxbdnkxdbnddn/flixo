@@ -31,6 +31,8 @@ body {
 main { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 0; display: flex; align-items: baseline; gap: 10px; }
 header h1 span { font-size: 13px; font-weight: 700; color: var(--accent-ink); background: var(--accent); padding: 1px 9px; border-radius: 6px; letter-spacing: .06em; }
+.vis { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.vis b { color: var(--text, #e6edf3); font-variant-numeric: tabular-nums; }
 header h1 small.ver { font-size: 12px; font-weight: 500; color: var(--muted); background: none; padding: 0; letter-spacing: .02em; }
 header p { margin: 4px 0 0; color: var(--muted); font-size: 14px; text-wrap: balance; }
 
@@ -185,6 +187,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   <header>
     <h1><img class="logo" id="hLogo" alt="FLIXO" role="img"><small class="ver" id="ver" dir="ltr">v1.0.0</small></h1>
     <p class="by">by <b>HERO</b></p>
+    <p class="vis" id="vis" hidden>👥 <b id="visN">0</b> شخص دخلوا FLIXO</p>
     <p>49 فلتر سينمائي مقسمة 6 مجموعات، للصور والفيديو. الفيديو لحد 30 دقيقة، وكل شي يشتغل على جهازك بدون ما ينرفع لأي مكان.</p>
   </header>
 
@@ -349,6 +352,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.6.0', d: '2026-11-14', title: 'عداد الزوار', items: ['صار يظهر تحت اسم FLIXO كم شخص دخل الموقع. كل جهاز ينحسب مرة وحدة.'] },
     { v: '1.5.3', d: '2026-11-14', title: 'صورة الموقع عند المشاركة', items: ['لما تبعث رابط FLIXO بواتساب أو تلجرام، تطلع صورة شعارك مع الاسم والوصف.', 'أيقونة تبويب المتصفح والتطبيق صارت حرف F.'] },
     { v: '1.5.2', d: '2026-11-14', title: 'الشعار المتحرك مكان اسم الموقع', items: ['الشعار المتحرك صار هو صورة الموقع بأعلى الصفحة، بدل كلمة FLIXO.', 'شلت شاشة الافتتاح.'] },
     { v: '1.5.1', d: '2026-11-14', title: 'الشعار المتحرك بالبداية فقط', items: ['الشعار المتحرك يطلع بشاشة الافتتاح بس، وشلته من أعلى الصفحة.', 'العلامة على الصورة والفيديو صارت مطفية افتراضياً (تقدر تشغّلها من «القياس والإطار»).'] },
@@ -1674,5 +1678,19 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   var sample = makeSample();
   setMedia({ kind: 'sample', src: sample, w: 960, h: 640 });
 })();
+
+  /* visitor counter: one count per device, via free counterapi.dev; hidden if unreachable */
+  (function () {
+    if (!/^https?:$/.test(location.protocol)) return;
+    var base = 'https://api.counterapi.dev/v1/flixo-hero/visitors/', seen = false;
+    try { seen = !!localStorage.getItem('flixo_counted'); } catch (e) {}
+    fetch(base + (seen ? '' : 'up'), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+      var n = j && (j.count != null ? j.count : j.value);
+      if (typeof n !== 'number') return;
+      try { localStorage.setItem('flixo_counted', '1'); } catch (e) {}
+      document.getElementById('visN').textContent = n.toLocaleString('en-US');
+      document.getElementById('vis').hidden = false;
+    }).catch(function () {});
+  })();
 </script>
 </body></html>
