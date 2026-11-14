@@ -13,7 +13,7 @@
   --accent: #ffb23f;
   --accent-ink: #1a1203;
   --danger: #ff6b6b;
-  --ok: #5fd39a;
+  --ok: #8FE3C0;
   --font: "Tajawal", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
 }
@@ -69,11 +69,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
 .section-label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
 .section-label small { color: var(--muted); font-weight: 400; font-size: 13px; }
 
-.strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.strip { display: flex; gap: 10px; overflow-x: auto; padding: 5px 5px 8px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 .chip { flex: none; width: 76px; background: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; scroll-snap-align: start; color: var(--muted); font-size: 13px; font-weight: 500; }
 .chip canvas { width: 72px; height: 72px; border-radius: 14px; border: 2px solid transparent; background: var(--surface-2); display: block; }
 .chip[aria-pressed="true"] { color: var(--fg); font-weight: 700; }
-.chip[aria-pressed="true"] canvas { border-color: var(--accent); }
+.chip[aria-pressed="true"] canvas { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(143,227,192,.5); }
 .chip span { text-align: center; line-height: 1.2; }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -147,7 +147,7 @@ details.adjust .adjlist { margin-top: 12px; }
 details.adjust #adjReset { margin-top: 12px; }
 .seg button { padding: 0 12px; font-size: 14px; }
 
-.ann { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, rgba(255,178,63,.14), var(--surface)); color: var(--fg); font: inherit; font-size: 14px; text-align: start; cursor: pointer; }
+.ann { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, rgba(143,227,192,.16), var(--surface)); color: var(--fg); font: inherit; font-size: 14px; text-align: start; cursor: pointer; }
 .ann .whale { font-size: 20px; flex: none; }
 .ann b { color: var(--accent); font-weight: 800; }
 .ann .txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -205,7 +205,8 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
 :root[data-theme="light"] header h1 img.logo { mix-blend-mode: normal; background: #000; border-radius: 18px; padding: 4px 8px; }
 :root[data-theme="light"] .ann { background: linear-gradient(90deg, rgba(143,227,192,.6), var(--surface)); }
 :root[data-theme="light"] .ann b { color: #C4540A; }
-:root[data-theme="light"] .chip[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--mint), 0 0 0 4px var(--accent); }
+:root[data-theme="light"] .chip[aria-pressed="true"] canvas { box-shadow: 0 0 0 3px var(--mint); }
+:root[data-theme="light"] .tab[aria-selected="true"] { box-shadow: 0 0 0 2px var(--mint); }
 :root[data-theme="light"] .badge { background: rgba(43,29,18,.78); color: #F5EBDD; }
 :root[data-theme="light"] .stage { background: #7b7b7b; border-color: var(--line); }
 :root[data-theme="light"] .pj img, :root[data-theme="light"] .pj .ph, :root[data-theme="light"] .adm-big div { background: rgba(43,29,18,.06); }
@@ -409,6 +410,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.9.1', d: '2026-11-14', title: 'لمسات أخيرة على الثيمين', items: ['حلقة نعناعية حول الفلتر المحدد بالغامق والفاتح، وما تنقص من الأطراف.', 'النعناعي صار لون النجاح والتنبيهات بالثيمين.'] },
     { v: '1.9.0', d: '2026-11-14', title: 'ثيم فاتح بالألوان الجديدة', items: ['زر ☀️ فوق يبدّل بين الثيم الغامق والثيم الفاتح (بيجي وبرتقالي ونعناعي).', 'اختيارك ينحفظ. وخلفية المعاينة بالثيم الفاتح رمادية محايدة حتى ما تتأثر ألوان الصورة.'] },
     { v: '1.8.1', d: '2026-11-14', title: 'إصلاح الأزرار', items: ['أزرار الرفع والحفظ والمشاريع صارت تترتب صح على الشاشة، والصفحة ما تصغر.'] },
     { v: '1.8.0', d: '2026-11-14', title: 'المشاريع والمسودات', items: ['زر 💾 حفظ يحفظ مشروعك (الملف مع كل الفلاتر والتعديلات) وترجع له من 📁 مشاريعي.', 'المسودات تنحفظ لحالها بعد ما تعدّل، وترجع لها من تبويب المسودات.', 'كل شي ينحفظ على جهازك بس.'] },
