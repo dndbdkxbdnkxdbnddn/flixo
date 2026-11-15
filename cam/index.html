@@ -25,11 +25,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    linear-gradient(to right,transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px)),
    linear-gradient(to bottom,transparent calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% - .5px),rgba(255,255,255,.35) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% - .5px),rgba(255,255,255,.35) calc(66.666% + .5px),transparent calc(66.666% + .5px));}
 #grid.on{display:block}
-.top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:linear-gradient(#000a,transparent);z-index:3}
+.top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;background:linear-gradient(#000a,transparent);z-index:3}
 .pill{font-family:var(--mono);font-size:12px;letter-spacing:.04em;padding:6px 10px;border-radius:6px;background:#0008;border:1px solid #ffffff22;direction:ltr}
 .tb{width:42px;height:42px;border-radius:50%;background:#0008;border:1px solid #ffffff22;display:grid;place-items:center}
 .tb svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tb.on{border-color:var(--acc)}.tb.on svg{stroke:var(--acc)}
+.grp{display:flex;gap:8px;align-items:center}
+.mid{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.zbar{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;align-items:center;gap:6px;z-index:3;pointer-events:none;direction:ltr}
+.zbar button,.zbar span{pointer-events:auto;font-family:var(--mono);font-size:12.5px;min-width:42px;padding:7px 10px;border-radius:999px;background:#0009;border:1px solid #ffffff2a;color:#fff;text-align:center}
+.zbar span{min-width:54px;color:var(--acc);border-color:transparent;background:#0009}
+.zbar button.on{border-color:var(--acc);color:var(--acc)}
+#sflash{position:absolute;inset:0;background:#fff;z-index:4;display:none;pointer-events:none}
+#sflash.on{display:block}
+#view{touch-action:none}
 #rec{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:13px;color:#fff;direction:ltr}
 #rec.on{display:flex}
 #rec i{width:9px;height:9px;border-radius:50%;background:var(--rec);animation:b 1s infinite}
@@ -94,11 +103,18 @@ input[type=range]{width:100%;accent-color:var(--acc);height:30px;margin:0}
     <div id="msg"></div>
     <div id="flash"></div>
     <div class="top">
-      <button class="tb" id="bFlip" aria-label="قلب الكاميرا"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><path d="M9.5 13a2.5 2.5 0 0 1 4.3-1.7M14.5 13a2.5 2.5 0 0 1-4.3 1.7"/></svg></button>
-      <div id="rec"><i></i><span id="recT">00:00</span></div>
-      <span class="pill" id="info">— —</span>
-      <button class="tb" id="bGrid" aria-label="شبكة"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button>
+      <div class="grp">
+        <button class="tb" id="bFlip" aria-label="قلب الكاميرا"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><path d="M9.5 13a2.5 2.5 0 0 1 4.3-1.7M14.5 13a2.5 2.5 0 0 1-4.3 1.7"/></svg></button>
+        <button class="tb" id="bFlash" aria-label="فلاش"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
+      </div>
+      <div class="mid"><span class="pill" id="info">— —</span><div id="rec"><i></i><span id="recT">00:00</span></div></div>
+      <div class="grp">
+        <button class="tb" id="bNight" aria-label="تصوير ليلي"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></button>
+        <button class="tb" id="bGrid" aria-label="شبكة"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button>
+      </div>
     </div>
+    <div class="zbar" id="zbar"><button data-z="1">1×</button><button data-z="2">2×</button><button data-z="4">4×</button><span id="zv">1.0×</span></div>
+    <div id="sflash"></div>
     <div class="toast" id="toast"></div>
 
     <div id="sheet">
@@ -130,10 +146,6 @@ input[type=range]{width:100%;accent-color:var(--acc);height:30px;margin:0}
         <div class="seg" id="segFps"><button data-v="24">24</button><button data-v="30">30</button><button data-v="60">60</button></div>
         <h4>الكاميرا الأمامية</h4>
         <div class="seg" id="segMir"><button data-v="1">عكس الصورة</button><button data-v="0">بدون عكس</button></div>
-        <div id="zoomBox" hidden>
-          <h4>التقريب</h4>
-          <div class="sl"><label>زوم</label><input type="range" id="zoom" min="1" max="4" step="0.1" value="1"><output id="zoomO">1.0x</output></div>
-        </div>
         <p class="note">إذا الجهاز ما يدعم الدقة أو الإطارات المطلوبة، يختار أقرب شي ممكن. الدقة الفعلية تظهر بأعلى الشاشة.</p>
       </div>
     </div>
@@ -180,7 +192,7 @@ const PRESETS=[
  {id:'brown',n:'داكن بني',v:{exp:-.15,con:.2,sat:-.2,temp:.25,sh:-.1,vig:.3}},
  {id:'neon',n:'نيون',v:{con:.2,sat:.4,st:[.03,0,.06],ht:[.05,-.01,.05]}}
 ];
-const S=Object.assign({facing:'environment',res:1080,fps:30,mode:'photo',grid:false,mirror:1,preset:'none',amt:1,lutId:null,lutAmt:1,adj:zeroAdj()},store.get('hxcam',{}));
+const S=Object.assign({facing:'environment',res:1080,fps:30,mode:'photo',grid:false,mirror:1,preset:'none',amt:1,lutId:null,lutAmt:1,night:false,flash:false,adj:zeroAdj()},store.get('hxcam',{}));
 S.adj=Object.assign(zeroAdj(),S.adj);
 const save=()=>store.set('hxcam',S);
 
@@ -195,11 +207,19 @@ const cv=$('#view');
 const gl=cv.getContext('webgl2',{preserveDrawingBuffer:true,antialias:false,alpha:false});
 if(!gl){showMsg('المتصفح ما يدعم WebGL2.<br>جرّب Chrome محدّث.')}
 const VS=`#version 300 es
-uniform float u_flip;out vec2 uv;
-void main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));uv=vec2(p.x,1.0-p.y);if(u_flip>.5)uv.x=1.0-uv.x;gl_Position=vec4(p*2.0-1.0,0.,1.);}`;
+uniform float u_flip,u_zoom;out vec2 uv;out vec2 vuv;
+void main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));uv=vec2(p.x,1.0-p.y);if(u_flip>.5)uv.x=1.0-uv.x;vuv=uv;uv=(uv-.5)/u_zoom+.5;gl_Position=vec4(p*2.0-1.0,0.,1.);}`;
+const AVS=`#version 300 es
+out vec2 uv;
+void main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));uv=p;gl_Position=vec4(p*2.0-1.0,0.,1.);}`;
+const AFS=`#version 300 es
+precision highp float;
+in vec2 uv;out vec4 o;
+uniform sampler2D cur,prev;uniform float u_k;
+void main(){vec3 a=texture(cur,uv).rgb,b=texture(prev,uv).rgb;float d=length(a-b);float k=u_k*(1.-smoothstep(.06,.28,d));o=vec4(mix(a,b,k),1.);}`;
 const FS=`#version 300 es
 precision highp float;precision highp int;
-in vec2 uv;out vec4 o;
+in vec2 uv;in vec2 vuv;out vec4 o;
 uniform sampler2D vid;uniform sampler2D lut;
 uniform float u_exp,u_con,u_sat,u_temp,u_tint,u_hi,u_sh,u_vig,u_grain,u_time,u_lutN,u_lutAmt,u_useLut;
 uniform vec3 u_st,u_ht;
@@ -224,16 +244,16 @@ void main(){
  c=mix(vec3(l),c,1.+u_sat);
  c=clamp(c,0.,1.);
  if(u_useLut>.5)c=mix(c,applyLut(c),u_lutAmt);
- vec2 d=uv-.5;c*=1.-u_vig*dot(d,d)*2.2;
+ vec2 d=vuv-.5;c*=1.-u_vig*dot(d,d)*2.2;
  c+=(rnd(uv*vec2(1920.,1080.)+u_time)-.5)*u_grain*.25;
  o=vec4(clamp(c,0.,1.),1.);}`;
-let prog,U={},vidTex,lutTex;
+let prog,U={},vidTex,lutTex,accProg,AU={},fboTex=[null,null],fbo=[null,null],fw=0,fh=0,ai=0,accReset=true;
 function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
 function initGL(){
  prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);
  if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(prog));
  gl.useProgram(prog);
- ['vid','lut','u_flip','u_exp','u_con','u_sat','u_temp','u_tint','u_hi','u_sh','u_vig','u_grain','u_time','u_lutN','u_lutAmt','u_useLut','u_st','u_ht'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+ ['vid','lut','u_zoom','u_flip','u_exp','u_con','u_sat','u_temp','u_tint','u_hi','u_sh','u_vig','u_grain','u_time','u_lutN','u_lutAmt','u_useLut','u_st','u_ht'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
  vidTex=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,vidTex);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
@@ -242,6 +262,21 @@ function initGL(){
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
  gl.uniform1i(U.vid,0);gl.uniform1i(U.lut,1);
+ accProg=gl.createProgram();gl.attachShader(accProg,sh(gl.VERTEX_SHADER,AVS));gl.attachShader(accProg,sh(gl.FRAGMENT_SHADER,AFS));gl.linkProgram(accProg);
+ if(!gl.getProgramParameter(accProg,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(accProg));
+ ['cur','prev','u_k'].forEach(n=>AU[n]=gl.getUniformLocation(accProg,n));
+ for(let i=0;i<2;i++){fboTex[i]=gl.createTexture();fbo[i]=gl.createFramebuffer()}
+}
+function ensureFbo(w,h){
+ if(fw===w&&fh===h)return;fw=w;fh=h;
+ for(let i=0;i<2;i++){
+  gl.activeTexture(gl.TEXTURE2+i);gl.bindTexture(gl.TEXTURE_2D,fboTex[i]);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fbo[i]);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,fboTex[i],0);
+ }
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);accReset=true;
 }
 
 /* ---------- LUT (.cube) ---------- */
@@ -378,11 +413,60 @@ async function startCamera(){
  const st=track.getSettings?track.getSettings():{};
  const cap=track.getCapabilities?track.getCapabilities():{};
  $('#info').textContent=`${st.width||video.videoWidth}×${st.height||video.videoHeight} · ${Math.round(st.frameRate||S.fps)}fps`;
- const zb=$('#zoomBox');
- if(cap.zoom){zb.hidden=false;const z=$('#zoom');z.min=cap.zoom.min;z.max=cap.zoom.max;z.step=cap.zoom.step||.1;z.value=st.zoom||cap.zoom.min;$('#zoomO').textContent=(+z.value).toFixed(1)+'x'}else zb.hidden=true;
+ hasTorch=!!cap.torch;hwZoom=!!cap.zoom;
+ if(hwZoom){zmin=cap.zoom.min;zmax=Math.min(cap.zoom.max,10)}else{zmin=1;zmax=5}
+ zoom=Math.max(zmin,Math.min(zmax,1));hwCap=cap;
+ torchOn=!!(S.flash&&hasTorch);
+ paintFlash();paintZoom();applyHw();
 }
-$('#zoom').oninput=e=>{const v=+e.target.value;$('#zoomO').textContent=v.toFixed(1)+'x';if(track)track.applyConstraints({advanced:[{zoom:v}]}).catch(()=>{})};
 $('#bFlip').onclick=()=>{S.facing=S.facing==='user'?'environment':'user';save();startCamera()};
+
+/* ---------- zoom / flash / night ---------- */
+let zoom=1,zmin=1,zmax=5,hwZoom=false,hasTorch=false,torchOn=false,hwCap={},hwBusy=false,hwDirty=false;
+async function applyHw(){
+ if(!track)return;
+ if(hwBusy){hwDirty=true;return}
+ hwBusy=true;
+ do{
+  hwDirty=false;const adv=[];
+  if(hwZoom)adv.push({zoom:zoom});
+  if(hasTorch)adv.push({torch:torchOn});
+  const ec=hwCap.exposureCompensation;
+  if(ec&&ec.max>ec.min)adv.push({exposureCompensation:S.night?ec.min+(ec.max-ec.min)*.85:Math.max(ec.min,Math.min(ec.max,0))});
+  if(hwCap.exposureMode&&hwCap.exposureMode.includes('continuous'))adv.push({exposureMode:'continuous'});
+  if(adv.length){try{await track.applyConstraints({advanced:adv})}catch(e){}}
+ }while(hwDirty);
+ hwBusy=false;
+}
+function paintZoom(){
+ $('#zv').textContent=zoom.toFixed(1)+'×';
+ $$('#zbar button').forEach(b=>{const z=+b.dataset.z;b.hidden=z>zmax;b.classList.toggle('on',Math.abs(zoom-z)<.06)});
+}
+function setZoom(v){
+ v=Math.max(zmin,Math.min(zmax,v));if(Math.abs(v-zoom)<.001)return;
+ zoom=v;paintZoom();if(hwZoom)applyHw();
+}
+$$('#zbar button').forEach(b=>b.onclick=()=>setZoom(+b.dataset.z));
+/* pinch + wheel on the preview */
+const ptrs=new Map();let pinch0=0,pinchZ=1;
+cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch0=Math.hypot(a[0]-b[0],a[1]-b[1])||1;pinchZ=zoom}});
+cv.addEventListener('pointermove',e=>{
+ if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+ if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);setZoom(pinchZ*d/pinch0)}
+});
+['pointerup','pointercancel','pointerleave'].forEach(n=>cv.addEventListener(n,e=>{ptrs.delete(e.pointerId)}));
+cv.addEventListener('wheel',e=>{e.preventDefault();setZoom(zoom*(e.deltaY<0?1.1:1/1.1))},{passive:false});
+
+function paintFlash(){$('#bFlash').classList.toggle('on',!!S.flash)}
+$('#bFlash').onclick=()=>{
+ S.flash=!S.flash;save();paintFlash();
+ if(hasTorch){torchOn=S.flash;applyHw();toast(S.flash?'الفلاش شغّال':'الفلاش مطفي')}
+ else if(S.facing==='user')toast(S.flash?'فلاش الشاشة: يضيء وقت التقاط الصورة':'الفلاش مطفي');
+ else toast(S.flash?'الفلاش غير مدعوم بهذا المتصفح أو الجهاز':'الفلاش مطفي');
+};
+function paintNight(){$('#bNight').classList.toggle('on',!!S.night)}
+$('#bNight').onclick=()=>{S.night=!S.night;save();paintNight();applyHw();toast(S.night?'وضع التصوير الليلي شغّال: ثبّت الجهاز لنتيجة أنظف':'وضع التصوير الليلي مطفي')};
+
 
 /* ---------- render loop ---------- */
 function effective(){
@@ -396,11 +480,25 @@ function frame(t){
  if(!gl||!prog||video.readyState<2||!video.videoWidth)return;
  const vw=video.videoWidth,vh=video.videoHeight;
  if(cv.width!==vw||cv.height!==vh){cv.width=vw;cv.height=vh}
- gl.viewport(0,0,vw,vh);
+ gl.useProgram(prog);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,vidTex);
  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video);
+ let srcUnit=0;
+ if(S.night){
+  ensureFbo(vw,vh);
+  gl.useProgram(accProg);gl.bindFramebuffer(gl.FRAMEBUFFER,fbo[ai]);gl.viewport(0,0,vw,vh);
+  gl.uniform1i(AU.cur,0);gl.uniform1i(AU.prev,2+(1-ai));gl.uniform1f(AU.u_k,accReset?0:.75);accReset=false;
+  gl.drawArrays(gl.TRIANGLES,0,3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  srcUnit=2+ai;ai=1-ai;
+  gl.useProgram(prog);
+ }else accReset=true;
+ gl.viewport(0,0,vw,vh);
+ gl.uniform1i(U.vid,srcUnit);
  const e=effective();
+ if(S.night){e.exp+=1.0;e.sh+=.35;e.grain=Math.max(0,e.grain-.1)}
+ gl.uniform1f(U.u_zoom,hwZoom?1:zoom);
  gl.uniform1f(U.u_flip,(S.facing==='user'&&S.mirror)?1:0);
  gl.uniform1f(U.u_exp,e.exp);gl.uniform1f(U.u_con,e.con);gl.uniform1f(U.u_sat,e.sat);gl.uniform1f(U.u_temp,e.temp);gl.uniform1f(U.u_tint,e.tint);
  gl.uniform1f(U.u_hi,e.hi);gl.uniform1f(U.u_sh,e.sh);gl.uniform1f(U.u_vig,Math.max(0,e.vig));gl.uniform1f(U.u_grain,Math.max(0,e.grain));
@@ -421,8 +519,9 @@ function setLast(item){
  if(item.type==='image')th.style.backgroundImage=`url(${item.url})`;
  else{const v=document.createElement('video');v.src=item.url;v.muted=true;v.onloadeddata=()=>{v.currentTime=.1};v.onseeked=()=>{try{const c=document.createElement('canvas');c.width=104;c.height=104;const x=c.getContext('2d');const s=Math.max(104/v.videoWidth,104/v.videoHeight);x.drawImage(v,(104-v.videoWidth*s)/2,(104-v.videoHeight*s)/2,v.videoWidth*s,v.videoHeight*s);th.style.backgroundImage=`url(${c.toDataURL('image/jpeg',.7)})`}catch(e){}}}
 }
-function takePhoto(){
+async function takePhoto(){
  if(!video.videoWidth){toast('الكاميرا ما اشتغلت بعد');return}
+ if(S.flash&&S.facing==='user'&&!hasTorch){const sf=$('#sflash');sf.classList.add('on');await new Promise(r=>setTimeout(r,320));cv.toBlob(b=>{sf.classList.remove('on');if(!b)return;setLast({blob:b,type:'image',name:stamp()+'.jpg'});toast('تم التقاط الصورة')},'image/jpeg',.95);return}
  const f=$('#flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
  cv.toBlob(b=>{if(!b)return;setLast({blob:b,type:'image',name:stamp()+'.jpg'});toast('تم التقاط الصورة')},'image/jpeg',.95);
 }
@@ -471,7 +570,7 @@ $('#pvShare').onclick=async()=>{
 
 /* ---------- boot ---------- */
 (async()=>{
- paintGrid();paintMode();renderPresets();renderSliders();
+ paintGrid();paintMode();paintNight();paintFlash();paintZoom();renderPresets();renderSliders();
  if(gl){try{initGL()}catch(e){showMsg('خطأ في معالجة الصورة: '+e.message);return}}
  await loadLutList();
  if(S.lutId!=null){const it=lutList.find(x=>x.id===S.lutId);if(it){try{uploadLut(it.text)}catch(e){S.lutId=null}}else S.lutId=null}
