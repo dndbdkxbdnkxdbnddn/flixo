@@ -271,6 +271,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   <section>
     <div class="section-label">الفلاتر <small id="fname">الأصلي</small></div>
     <div class="combo"><button type="button" class="toggle" id="combineBtn" aria-pressed="false">دمج أكثر من فلتر</button><span class="hint" id="combineHint"></span></div>
+    <div class="combo"><button type="button" class="toggle" id="preSave">⭐ احفظ هذا الفلتر</button><button type="button" class="toggle" id="preOpen">⭐ فلاتري</button></div>
     <div class="tabs" id="tabs" role="tablist" aria-label="مجموعات الفلاتر"></div>
     <div class="strip" id="strip" role="group" aria-label="الفلاتر"></div>
     <div class="stackbox" id="stackBox" hidden></div>
@@ -394,6 +395,15 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   </div>
 </div>
 
+<div class="sheet" id="pre" hidden role="dialog" aria-modal="true" dir="rtl">
+  <div class="card">
+    <h2>⭐ فلاتري</h2>
+    <p class="sub">توليفتك (الفلاتر وشدتها والتعديلات) تنحفظ على جهازك وتطبقها على أي صورة أو فيديو بضغطة.</p>
+    <div id="preList"></div>
+    <button class="btn" id="preClose" type="button">إغلاق</button>
+  </div>
+</div>
+
 <div class="sheet" id="prj" hidden role="dialog" aria-modal="true" dir="rtl">
   <div class="card">
     <h2>📁 مشاريعي</h2>
@@ -423,6 +433,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.12.0', d: '2026-11-17', title: 'فلاتري المحفوظة', items: ['زر «⭐ احفظ هذا الفلتر» يحفظ توليفتك (الفلاتر وشدتها والتعديلات) باسم تختاره.', 'من «⭐ فلاتري» تطبقها على أي صورة أو فيديو بضغطة، أو تحذفها.'] },
     { v: '1.11.0', d: '2026-11-17', title: 'قبل / بعد', items: ['زر «↔ قبل / بعد» يظهر خط تسحبه فوق الصورة أو الفيديو: يسار الخط الأصل ويمينه المعدل.', 'اضغطه مرة ثانية للرجوع. والضغط المطوّل لرؤية الأصل يظل شغال بدونه.'] },
     { v: '1.10.2', priv: true, d: '2026-11-16', title: 'إصلاح تحميل اللوحة', items: ['اللوحة صارت تعرض الأرقام أول بأول ولا تعلق، وفيها زر إعادة المحاولة.'] },
     { v: '1.10.1', priv: true, d: '2026-11-16', title: 'عداد التصدير اليومي', items: ['اللوحة الخاصة تعرض كم جهاز صدّر اليوم وأمس.'] },
@@ -1776,6 +1787,46 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     state.autoIdx = 0; updateFilterUI(); redraw(); updateEstimate();
     $('autoNote').hidden = true; this.hidden = true;
   });
+
+  /* ---------- my looks (presets, saved on this device) ---------- */
+  var PKEY = 'flixo_presets';
+  function pGet() { try { return JSON.parse(localStorage.getItem(PKEY) || '[]'); } catch (e) { return []; } }
+  function pSet(a) { try { localStorage.setItem(PKEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+  function lookSnap() {
+    return { stack: state.stack.map(function (x) { return { id: x.f.id, a: x.a }; }), amount: state.amount, combine: state.combine, raw: JSON.parse(JSON.stringify(adjRaw)) };
+  }
+  function applyLook(d) {
+    state.combine = !!d.combine; $('combineBtn').setAttribute('aria-pressed', String(state.combine));
+    state.stack = (d.stack || []).map(function (x) { return { f: FILTERS.filter(function (f) { return f.id === x.id; })[0], a: x.a }; }).filter(function (x) { return x.f; });
+    setAmount(d.amount == null ? 1 : d.amount); applyAdjRaw(d.raw || {});
+    updateFilterUI(); redraw(); updateEstimate();
+  }
+  $('preSave').addEventListener('click', function () {
+    var d = lookSnap(), nm = window.prompt('اسم الفلتر:', state.stack.length ? state.stack.map(function (x) { return x.f.name; }).join(' + ') : 'فلتري');
+    if (nm === null) return; nm = nm.trim() || 'فلتري';
+    var a = pGet(); a.unshift({ id: 'l' + Date.now().toString(36), name: nm, t: Date.now(), d: d });
+    if (pSet(a.slice(0, 40))) say('انحفظ «' + nm + '». تلكاه بـ ⭐ فلاتري.', 'ok'); else say('ما كدرت أحفظ.', 'err');
+  });
+  function renderPre() {
+    var box = $('preList'), a = pGet(); box.innerHTML = '';
+    if (!a.length) { box.innerHTML = '<p class="sub">ما عندك فلاتر محفوظة. عدّل صورتك واضغط «⭐ احفظ هذا الفلتر».</p>'; return; }
+    a.forEach(function (x) {
+      var row = document.createElement('div'); row.className = 'pj';
+      var mt = document.createElement('div'); mt.className = 'mt';
+      var b = document.createElement('b'); b.textContent = x.name; var sp = document.createElement('span');
+      var names = (x.d.stack || []).map(function (y) { var f = FILTERS.filter(function (f) { return f.id === y.id; })[0]; return f ? f.name : ''; }).filter(Boolean).join(' + ');
+      sp.textContent = names || 'تعديلات فقط'; mt.appendChild(b); mt.appendChild(sp);
+      var bt = document.createElement('div'); bt.className = 'bt';
+      var o = document.createElement('button'); o.className = 'btn btn-primary'; o.textContent = 'تطبيق';
+      var d = document.createElement('button'); d.className = 'btn btn-ghost'; d.textContent = 'حذف';
+      o.onclick = function () { if (!state.media) { say('ارفع صورة أو فيديو أول.', 'err'); return; } applyLook(x.d); $('pre').hidden = true; };
+      d.onclick = function () { if (!window.confirm('حذف «' + x.name + '»؟')) return; pSet(pGet().filter(function (y) { return y.id !== x.id; })); renderPre(); };
+      bt.appendChild(o); bt.appendChild(d); row.appendChild(mt); row.appendChild(bt); box.appendChild(row);
+    });
+  }
+  $('preOpen').addEventListener('click', function () { $('pre').hidden = false; renderPre(); });
+  $('preClose').addEventListener('click', function () { $('pre').hidden = true; });
+  $('pre').addEventListener('click', function (e) { if (e.target === $('pre')) $('pre').hidden = true; });
 
   /* ---------- drafts + saved projects (IndexedDB, on this device only) ---------- */
   var DBP = null, draftTimer = 0;
