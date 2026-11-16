@@ -271,7 +271,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   <section>
     <div class="section-label">الفلاتر <small id="fname">الأصلي</small></div>
     <div class="combo"><button type="button" class="toggle" id="combineBtn" aria-pressed="false">دمج أكثر من فلتر</button><span class="hint" id="combineHint"></span></div>
-    <div class="combo"><button type="button" class="toggle" id="preSave">⭐ احفظ هذا الفلتر</button><button type="button" class="toggle" id="preOpen">⭐ فلاتري</button></div>
+    <div class="combo"><button type="button" class="toggle" id="preSave">⭐ احفظ هذا الفلتر</button><button type="button" class="toggle" id="preOpen">⭐ فلاتري</button><button type="button" class="toggle" id="lutBtn">🎞 LUT</button></div>
     <div class="tabs" id="tabs" role="tablist" aria-label="مجموعات الفلاتر"></div>
     <div class="strip" id="strip" role="group" aria-label="الفلاتر"></div>
     <div class="stackbox" id="stackBox" hidden></div>
@@ -395,6 +395,19 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   </div>
 </div>
 
+<div class="sheet" id="lutS" hidden role="dialog" aria-modal="true" dir="rtl">
+  <div class="card">
+    <h2>🎞 ملفات LUT</h2>
+    <p class="sub">استورد ملف LUT بصيغة <b dir="ltr">.cube</b> (ثلاثي الأبعاد) وطبّقه كفلتر. الملفات تنحفظ على جهازك بس.</p>
+    <button class="btn btn-primary" id="lutImp" type="button" style="width:100%">📥 استيراد LUT</button>
+    <input id="lutFile" type="file" accept=".cube,.CUBE,text/plain" multiple hidden>
+    <p class="sub" id="lutMsg"></p>
+    <div id="lutList"></div>
+    <div class="slider" id="lutAmtRow" hidden><label for="lutAmt">الشدة</label><input type="range" id="lutAmt" min="0" max="100" value="100"><output id="lutAmtOut">100%</output></div>
+    <button class="btn" id="lutClose" type="button">إغلاق</button>
+  </div>
+</div>
+
 <div class="sheet" id="pre" hidden role="dialog" aria-modal="true" dir="rtl">
   <div class="card">
     <h2>⭐ فلاتري</h2>
@@ -433,6 +446,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.14.0', d: '2026-11-17', title: 'استيراد LUT', items: ['زر «🎞 LUT» يخليك تستورد ملفات LUT بصيغة .cube (3D) وتطبقها على الصورة والفيديو مع التحكم بالشدة.', 'الـ LUT تنحفظ على جهازك، وتنحفظ مع فلاترك ومشاريعك.'] },
     { v: '1.13.0', d: '2026-11-17', title: 'توهج وشريط سينمائي', items: ['سلايدر «توهج» داخل «تعديل الصورة» يعطي هالة ناعمة حول الأماكن المضيئة.', 'سلايدر «شريط سينمائي» يضيف خطين سود أعلى وأسفل مثل الأفلام. (الحبيبات وتغميق الأطراف كانوا موجودين: «الحبيبات» و«الحواف».)'] },
     { v: '1.12.0', d: '2026-11-17', title: 'فلاتري المحفوظة', items: ['زر «⭐ احفظ هذا الفلتر» يحفظ توليفتك (الفلاتر وشدتها والتعديلات) باسم تختاره.', 'من «⭐ فلاتري» تطبقها على أي صورة أو فيديو بضغطة، أو تحذفها.'] },
     { v: '1.11.0', d: '2026-11-17', title: 'قبل / بعد', items: ['زر «↔ قبل / بعد» يظهر خط تسحبه فوق الصورة أو الفيديو: يسار الخط الأصل ويمينه المعدل.', 'اضغطه مرة ثانية للرجوع. والضغط المطوّل لرؤية الأصل يظل شغال بدونه.'] },
@@ -589,7 +603,8 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     'varying vec2 v;uniform sampler2D t,t2;',
     'uniform vec3 uSlope[3],uPow[3],uSh[3],uHi[3];uniform vec4 uP[3];uniform vec3 uAmtL;',
     'uniform vec4 uFr;uniform vec3 uFr2;float inb;',
-    'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed,uGlow,uBars;uniform vec2 uTex;',
+    'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed,uGlow,uBars;uniform vec2 uTex;uniform sampler2D uLut;uniform float uLutN,uLutA;',
+    'vec3 lutS(vec3 c){float n=uLutN;float b=c.b*(n-1.);float b0=floor(b);float b1=min(b0+1.,n-1.);float f=b-b0;float w=n*n;vec2 g=vec2(c.r*(n-1.)+.5,c.g*(n-1.)+.5);vec3 a=texture2D(uLut,vec2((b0*n+g.x)/w,g.y/n)).rgb;vec3 d=texture2D(uLut,vec2((b1*n+g.x)/w,g.y/n)).rgb;return mix(a,d,f);}',
     'float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}',
     'vec3 S(vec2 p){vec3 a=texture2D(t,p).rgb;if(uMix>0.){a=mix(a,texture2D(t2,p).rgb,uMix);}return a;}',
     'vec3 lk(vec3 o,vec3 sl,vec3 pw,vec3 sh,vec3 hi,vec4 p,float amt){',
@@ -611,6 +626,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     ' c=lk(c,uSlope[0],uPow[0],uSh[0],uHi[0],uP[0],uAmtL.x);',
     ' c=lk(c,uSlope[1],uPow[1],uSh[1],uHi[1],uP[1],uAmtL.y);',
     ' c=lk(c,uSlope[2],uPow[2],uSh[2],uHi[2],uP[2],uAmtL.z);',
+    ' if(uLutA>0.)c=mix(c,lutS(clamp(c,0.,1.)),uLutA);',
     ' if(uGlow>0.){vec3 g=vec3(0.);for(int i=0;i<8;i++){float a=float(i)*.785398;vec2 d=vec2(cos(a),sin(a))*uTex*16.;g+=S(su+d)+S(su+d*2.4);}g/=16.;c+=max(g-.5,0.)*uGlow*1.2;}',
     ' vec2 q=v-.5;q.x*=uAsp;c*=1.-uVigA*smoothstep(.25,.85,length(q));',
     ' float n=fract(sin(dot(floor(gl_FragCoord.xy/uGs)+uSeed,vec2(12.9898,78.233)))*43758.5453);',
@@ -644,10 +660,11 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
       return t;
     }
     var texCur = mkTex(), texPrev = mkTex(), sw = 1, shh = 1;
-    gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 't2'), 1);
+    gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 't2'), 1); gl.uniform1i(gl.getUniformLocation(pr, 'uLut'), 3);
+    var lutTex = null, lutKey = null;
     var U = {};
     ['uSlope', 'uPow', 'uSh', 'uHi', 'uP'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n + '[0]'); });
-    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uGlow', 'uBars', 'uTex', 'uFr', 'uFr2'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uGlow', 'uBars', 'uLutN', 'uLutA', 'uTex', 'uFr', 'uFr2'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
     this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
     var FR = { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }, wmOn = false, wmReady = false, wmTex, wmPr, wmU = {}, wmLoc;
     this.setFrame = function (f) { FR = f || { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }; };
@@ -714,6 +731,19 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
       gl.uniform1f(U.uBri, ad.bri || 0); gl.uniform1f(U.uCon2, ad.con == null ? 1 : ad.con); gl.uniform1f(U.uSat2, ad.sat == null ? 1 : ad.sat);
       gl.uniform1f(U.uVib, ad.vib || 0); gl.uniform1f(U.uTemp, ad.temp || 0); gl.uniform1f(U.uTint, ad.tint || 0);
       gl.uniform1f(U.uHiA, ad.hi || 0); gl.uniform1f(U.uShA, ad.sh || 0); gl.uniform1f(U.uFadeA, ad.fade || 0);
+      var LU = ad.lut;
+      if (LU && LU.a > 0) {
+        gl.activeTexture(gl.TEXTURE3);
+        if (!lutTex) { lutTex = gl.createTexture(); }
+        gl.bindTexture(gl.TEXTURE_2D, lutTex);
+        if (lutKey !== LU.key) {
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, LU.n * LU.n, LU.n, 0, gl.RGBA, gl.UNSIGNED_BYTE, LU.data); lutKey = LU.key;
+        }
+        gl.uniform1f(U.uLutN, LU.n); gl.uniform1f(U.uLutA, LU.a);
+        gl.activeTexture(gl.TEXTURE0);
+      } else { gl.uniform1f(U.uLutA, 0); }
       gl.uniform1f(U.uGlow, ad.glow || 0); gl.uniform1f(U.uBars, ad.bars || 0); gl.uniform1f(U.uVigA, ad.vig || 0); gl.uniform1f(U.uGrain, ad.grain || 0);
       gl.uniform1f(U.uGs, Math.max(1, w / 1280)); gl.uniform1f(U.uSeed, Math.random() * 100);
       gl.uniform4f(U.uFr, FR.vx, FR.vy, FR.cx, FR.cy); gl.uniform3f(U.uFr2, FR.rot, FR.flip, FR.fit);
@@ -730,7 +760,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   var R = null, T = null;
   try { R = new Renderer(cv); T = new Renderer(thumbCv); } catch (e) { R = null; T = null; try { console.error("GLERR " + (e && e.message)); } catch (x) {} }
 
-  var state = { stack: [], combine: false, amount: 1, showOrig: false, media: null, exporting: false, cancelled: false };
+  var state = { lut: null, stack: [], combine: false, amount: 1, showOrig: false, media: null, exporting: false, cancelled: false };
   state.frame = { ratio: null, rot: 0, flip: 0, fit: 0, zoom: 1, px: 0, py: 0 };
   state.wm = false;
   var RATIOS = [
@@ -762,12 +792,13 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   function fitPreview() { var m = state.media; if (!m) return; var fd = frameInfo(m); sizeCanvas(fd.w, fd.h, m.kind === 'video' ? 960 : 1280); }
   var NOADJ = { bri: 0, con: 1, sat: 1, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0, glow: 0, bars: 0 };
   var adjRaw = { bri: 0, con: 0, sat: 0, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0, glow: 0, bars: 0 };
-  var adj = NOADJ;
+  var adj = NOADJ, lutCache = {};
   var trim = { a: 0, b: 1000 };
   function computeAdj() {
     var r = adjRaw;
     adj = { bri: r.bri / 100 * .9, con: 1 + r.con / 100 * .6, sat: 1 + r.sat / 100, vib: r.vib / 100 * 1.2, temp: r.temp / 100, tint: r.tint / 100,
-            hi: r.hi / 100, sh: r.sh / 100, fade: r.fade / 100 * .25, vig: r.vig / 100 * .8, grain: r.grain / 100, glow: r.glow / 100, bars: r.bars / 100 * .14 };
+            hi: r.hi / 100, sh: r.sh / 100, fade: r.fade / 100 * .25, vig: r.vig / 100 * .8, grain: r.grain / 100, glow: r.glow / 100, bars: r.bars / 100 * .14,
+            lut: (state.lut && lutCache[state.lut.id]) ? { key: state.lut.id, n: lutCache[state.lut.id].n, data: lutCache[state.lut.id].data, a: state.lut.a } : null };
   }
   function stackAmt() { return state.stack.map(function (x) { return { f: x.f, a: x.a * state.amount }; }); }
   function stackName() { return state.stack.length ? state.stack.map(function (x) { return x.f.id; }).join('+') : 'original'; }
@@ -1791,17 +1822,104 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     $('autoNote').hidden = true; this.hidden = true;
   });
 
+  /* ---------- LUT import (.cube 3D) ---------- */
+  var LKEY = 'flixo_luts';
+  function lGet() { try { return JSON.parse(localStorage.getItem(LKEY) || '[]'); } catch (e) { return []; } }
+  function lSet(a) { try { localStorage.setItem(LKEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+  function b64enc(u8) { var s2 = '', i; for (i = 0; i < u8.length; i += 8192) s2 += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s2); }
+  function b64dec(t) { var s2 = atob(t), u = new Uint8Array(s2.length), i; for (i = 0; i < s2.length; i++) u[i] = s2.charCodeAt(i); return u; }
+  function parseCube(text) {
+    var N = 0, dmin = [0, 0, 0], dmax = [1, 1, 1], vals = [], lines = text.split(/\r?\n/), i, one = false;
+    for (i = 0; i < lines.length; i++) {
+      var ln = lines[i].trim(); if (!ln || ln.charAt(0) === '#') continue;
+      var p = ln.split(/\s+/), k = p[0].toUpperCase();
+      if (k === 'LUT_3D_SIZE') N = parseInt(p[1], 10);
+      else if (k === 'LUT_1D_SIZE') one = true;
+      else if (k === 'DOMAIN_MIN') dmin = [+p[1], +p[2], +p[3]];
+      else if (k === 'DOMAIN_MAX') dmax = [+p[1], +p[2], +p[3]];
+      else if (k === 'TITLE' || k === 'LUT_1D_INPUT_RANGE' || k === 'LUT_3D_INPUT_RANGE') continue;
+      else if (p.length >= 3 && !isNaN(+p[0])) vals.push(+p[0], +p[1], +p[2]);
+    }
+    if (one && !N) throw new Error('هذا LUT أحادي البعد (1D). المدعوم ثلاثي الأبعاد (3D).');
+    if (!N || N < 2) throw new Error('الملف ما فيه LUT_3D_SIZE، يمكن مو ملف .cube صحيح.');
+    if (vals.length < N * N * N * 3) throw new Error('بيانات الملف ناقصة.');
+    var step = 1, M = N;
+    if (N > 64) { step = 2; M = Math.floor((N - 1) / 2) + 1; }
+    var out = new Uint8Array(M * M * M * 3), r, g, b, o = 0, sc = [1 / (dmax[0] - dmin[0] || 1), 1 / (dmax[1] - dmin[1] || 1), 1 / (dmax[2] - dmin[2] || 1)];
+    for (b = 0; b < M; b++) for (g = 0; g < M; g++) for (r = 0; r < M; r++) {
+      var idx = ((b * step) * N * N + (g * step) * N + (r * step)) * 3;
+      for (var c = 0; c < 3; c++) { var v = (vals[idx + c] - dmin[c]) * sc[c]; out[o++] = Math.max(0, Math.min(255, Math.round(v * 255))); }
+    }
+    return { n: M, rgb: out };
+  }
+  function lutToRGBA(n, rgb) {
+    var W = n * n, data = new Uint8Array(W * n * 4), r, g, b;
+    for (b = 0; b < n; b++) for (g = 0; g < n; g++) for (r = 0; r < n; r++) {
+      var src = (b * n * n + g * n + r) * 3, dst = (g * W + b * n + r) * 4;
+      data[dst] = rgb[src]; data[dst + 1] = rgb[src + 1]; data[dst + 2] = rgb[src + 2]; data[dst + 3] = 255;
+    }
+    return data;
+  }
+  function lutReady(l) { if (!lutCache[l.id]) lutCache[l.id] = { n: l.n, data: lutToRGBA(l.n, b64dec(l.b)) }; return lutCache[l.id]; }
+  function setLut(id, a) {
+    if (!id) { state.lut = null; } else { var l = lGet().filter(function (x) { return x.id === id; })[0]; if (!l) return false; lutReady(l); state.lut = { id: id, a: a == null ? 1 : a }; }
+    computeAdj(); redraw(); lutUI(); return true;
+  }
+  function lutUI() {
+    var l = state.lut ? lGet().filter(function (x) { return x.id === state.lut.id; })[0] : null;
+    $('lutBtn').textContent = l ? '🎞 LUT: ' + l.name : '🎞 LUT';
+    $('lutBtn').setAttribute('aria-pressed', String(!!l));
+    $('lutAmtRow').hidden = !l;
+    if (state.lut) { $('lutAmt').value = Math.round(state.lut.a * 100); $('lutAmtOut').textContent = Math.round(state.lut.a * 100) + '%'; }
+  }
+  function renderLut() {
+    var box = $('lutList'), a = lGet(); box.innerHTML = '';
+    if (!a.length) { box.innerHTML = '<p class="sub">ما عندك LUT مستوردة بعد.</p>'; return; }
+    a.forEach(function (x) {
+      var row = document.createElement('div'); row.className = 'pj';
+      var mt = document.createElement('div'); mt.className = 'mt';
+      var b = document.createElement('b'); b.textContent = x.name; var sp = document.createElement('span'); sp.textContent = x.n + '³';
+      mt.appendChild(b); mt.appendChild(sp);
+      var bt = document.createElement('div'); bt.className = 'bt';
+      var on = state.lut && state.lut.id === x.id;
+      var o = document.createElement('button'); o.className = 'btn btn-primary'; o.textContent = on ? 'إلغاء' : 'تطبيق';
+      var d = document.createElement('button'); d.className = 'btn btn-ghost'; d.textContent = 'حذف';
+      o.onclick = function () { if (!state.media) { say('ارفع صورة أو فيديو أول.', 'err'); return; } setLut(on ? null : x.id, 1); renderLut(); };
+      d.onclick = function () { if (!window.confirm('حذف «' + x.name + '»؟')) return; if (state.lut && state.lut.id === x.id) setLut(null); lSet(lGet().filter(function (y) { return y.id !== x.id; })); delete lutCache[x.id]; renderLut(); };
+      bt.appendChild(o); bt.appendChild(d); row.appendChild(mt); row.appendChild(bt); box.appendChild(row);
+    });
+  }
+  $('lutBtn').addEventListener('click', function () { $('lutS').hidden = false; $('lutMsg').textContent = ''; renderLut(); lutUI(); });
+  $('lutClose').addEventListener('click', function () { $('lutS').hidden = true; });
+  $('lutS').addEventListener('click', function (e) { if (e.target === $('lutS')) $('lutS').hidden = true; });
+  $('lutImp').addEventListener('click', function () { $('lutFile').click(); });
+  $('lutFile').addEventListener('change', function () {
+    var files = Array.prototype.slice.call(this.files || []), self = this, msg = $('lutMsg'); msg.textContent = '';
+    (function next() {
+      var f = files.shift(); if (!f) { self.value = ''; renderLut(); return; }
+      if (f.size > 40 * 1048576) { msg.textContent = '«' + f.name + '» كبير كلش.'; return next(); }
+      f.text().then(function (t) {
+        var p = parseCube(t), a = lGet();
+        a.unshift({ id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: f.name.replace(/\.[^.]+$/, ''), n: p.n, b: b64enc(p.rgb) });
+        if (!lSet(a.slice(0, 12))) { msg.textContent = 'ما كدرت أحفظ «' + f.name + '». المساحة ممتلئة، احذف LUT قديمة.'; }
+        else msg.textContent = 'تم استيراد «' + f.name + '».';
+      }).catch(function (e) { msg.textContent = '«' + f.name + '»: ' + (e && e.message || 'ملف غير صالح'); }).then(next);
+    })();
+  });
+  $('lutAmt').addEventListener('input', function () { if (!state.lut) return; state.lut.a = this.value / 100; $('lutAmtOut').textContent = this.value + '%'; computeAdj(); redraw(); });
+
   /* ---------- my looks (presets, saved on this device) ---------- */
   var PKEY = 'flixo_presets';
   function pGet() { try { return JSON.parse(localStorage.getItem(PKEY) || '[]'); } catch (e) { return []; } }
   function pSet(a) { try { localStorage.setItem(PKEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
   function lookSnap() {
-    return { stack: state.stack.map(function (x) { return { id: x.f.id, a: x.a }; }), amount: state.amount, combine: state.combine, raw: JSON.parse(JSON.stringify(adjRaw)) };
+    return { stack: state.stack.map(function (x) { return { id: x.f.id, a: x.a }; }), amount: state.amount, combine: state.combine, raw: JSON.parse(JSON.stringify(adjRaw)), lut: state.lut ? { id: state.lut.id, a: state.lut.a } : null };
   }
   function applyLook(d) {
     state.combine = !!d.combine; $('combineBtn').setAttribute('aria-pressed', String(state.combine));
     state.stack = (d.stack || []).map(function (x) { return { f: FILTERS.filter(function (f) { return f.id === x.id; })[0], a: x.a }; }).filter(function (x) { return x.f; });
     setAmount(d.amount == null ? 1 : d.amount); applyAdjRaw(d.raw || {});
+    if (d.lut && setLut(d.lut.id, d.lut.a)) {} else { state.lut = null; computeAdj(); lutUI(); }
     updateFilterUI(); redraw(); updateEstimate();
   }
   $('preSave').addEventListener('click', function () {
@@ -1855,12 +1973,13 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   function snapshot() {
     return { stack: state.stack.map(function (x) { return { id: x.f.id, a: x.a }; }), amount: state.amount, combine: state.combine,
       raw: JSON.parse(JSON.stringify(adjRaw)), opts: JSON.parse(JSON.stringify(opts)), frame: JSON.parse(JSON.stringify(state.frame)), wm: state.wm,
-      trim: { a: trim.a, b: trim.b } };
+      trim: { a: trim.a, b: trim.b }, lut: state.lut ? { id: state.lut.id, a: state.lut.a } : null };
   }
   function applyRestore(d) {
     state.combine = !!d.combine; $('combineBtn').setAttribute('aria-pressed', String(state.combine));
     state.stack = (d.stack || []).map(function (x) { return { f: FILTERS.filter(function (f) { return f.id === x.id; })[0], a: x.a }; }).filter(function (x) { return x.f; });
     setAmount(d.amount == null ? 1 : d.amount); applyAdjRaw(d.raw || {});
+    if (d.lut && setLut(d.lut.id, d.lut.a)) {} else { state.lut = null; computeAdj(); lutUI(); }
     if (d.opts) { setSeg('segVRes', d.opts.vres); setSeg('segFps', d.opts.fps); setSeg('segIRes', d.opts.ires); setSeg('segSharp', String(d.opts.sharp)); }
     if (d.frame) { state.frame = d.frame; state.wm = !!d.wm; syncFrameUI(); fitPreview(); applyFrame(); }
     if (d.trim && state.media && state.media.kind === 'video') { trim.a = d.trim.a; trim.b = d.trim.b; updateTrimUI(); }
