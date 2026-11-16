@@ -413,6 +413,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.10.1', priv: true, d: '2026-11-16', title: 'عداد التصدير اليومي', items: ['اللوحة الخاصة تعرض كم جهاز صدّر اليوم وأمس.'] },
     { v: '1.10.0', d: '2026-11-14', title: 'تحسين تلقائي للتعديلات', items: ['زر ✨ تحسين تلقائي داخل «تعديل الصورة» يضبط السطوع والتباين والألوان لحاله، ويخلي الفلتر اللي اخترته. اضغطه مرة ثانية للرجوع.'] },
     { v: '1.9.1', d: '2026-11-14', title: 'لمسات أخيرة على الثيمين', items: ['حلقة نعناعية حول الفلتر المحدد بالغامق والفاتح، وما تنقص من الأطراف.', 'النعناعي صار لون النجاح والتنبيهات بالثيمين.'] },
     { v: '1.9.0', d: '2026-11-14', title: 'ثيم فاتح بالألوان الجديدة', items: ['زر ☀️ فوق يبدّل بين الثيم الغامق والثيم الفاتح (بيجي وبرتقالي ونعناعي).', 'اختيارك ينحفظ. وخلفية المعاينة بالثيم الفاتح رمادية محايدة حتى ما تتأثر ألوان الصورة.'] },
@@ -1952,6 +1953,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     window.FX = { t: function (ev) {
       if (!live || ls('flixo_owner')) return;
       once('fx_a_' + D, 'a-' + D);
+      if (ev === 'export') once('fx_x_' + D, 'x-' + D);
       call('hit', 'ev-' + ev).catch(function () {});
     } };
 
@@ -1966,7 +1968,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     function dash() {
       body.innerHTML = '<p class="sub">جاري التحميل…</p>';
       var days = [0, 1, 2, 3, 4, 5, 6].map(day), keys = ['visitors', 'ev-upload', 'ev-export'];
-      days.forEach(function (d) { keys.push('v-' + d, 'a-' + d); });
+      days.forEach(function (d) { keys.push('v-' + d, 'a-' + d, 'x-' + d); });
       Promise.all(keys.map(function (k) { return call('get', k).catch(function () { return null; }); })).then(function (r) {
         var m = {}; keys.forEach(function (k, i) { m[k] = r[i]; });
         if (r.every(function (x) { return x == null; })) { body.innerHTML = '<p class="sub">⚠️ تعذر الاتصال بخدمة العد. جرّب مرة ثانية.</p>'; return; }
@@ -1975,10 +1977,12 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
           '<div><b>' + fmt(m['a-' + days[0]]) + '</b><span>تفاعلوا اليوم</span></div>' +
           '<div><b>' + fmt(m['v-' + days[1]]) + '</b><span>دخلوا أمس</span></div>' +
           '<div><b>' + fmt(m['a-' + days[1]]) + '</b><span>تفاعلوا أمس</span></div>' +
+          '<div><b>' + fmt(m['x-' + days[0]]) + '</b><span>صدّروا اليوم</span></div>' +
+          '<div><b>' + fmt(m['x-' + days[1]]) + '</b><span>صدّروا أمس</span></div>' +
           '<div><b>' + fmt(m['ev-upload']) + ' / ' + fmt(m['ev-export']) + '</b><span>رفع / تصدير (الكل)</span></div></div>' +
-          '<h3 class="adm-h">آخر 7 أيام</h3><table class="adm-t"><tr><th>اليوم</th><th>دخول</th><th>تفاعل</th></tr>';
-        days.forEach(function (d) { h += '<tr><td dir="ltr">' + d + '</td><td>' + fmt(m['v-' + d]) + '</td><td>' + fmt(m['a-' + d]) + '</td></tr>'; });
-        body.innerHTML = h + '</table><p class="sub">الرقم = عدد الأجهزة (مو أشخاص). "تفاعل" = رفع ملف أو تصدير.</p>';
+          '<h3 class="adm-h">آخر 7 أيام</h3><table class="adm-t"><tr><th>اليوم</th><th>دخول</th><th>تفاعل</th><th>تصدير</th></tr>';
+        days.forEach(function (d) { h += '<tr><td dir="ltr">' + d + '</td><td>' + fmt(m['v-' + d]) + '</td><td>' + fmt(m['a-' + d]) + '</td><td>' + fmt(m['x-' + d]) + '</td></tr>'; });
+        body.innerHTML = h + '</table><p class="sub">الرقم = عدد الأجهزة (مو أشخاص). "تفاعل" = رفع ملف أو تصدير. "تصدير" = أشخاص صدّروا فعلاً (مرة وحدة لكل جهاز باليوم).</p>';
       });
     }
     function login() {
