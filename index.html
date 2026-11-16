@@ -433,6 +433,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '1.13.0', d: '2026-11-17', title: 'توهج وشريط سينمائي', items: ['سلايدر «توهج» داخل «تعديل الصورة» يعطي هالة ناعمة حول الأماكن المضيئة.', 'سلايدر «شريط سينمائي» يضيف خطين سود أعلى وأسفل مثل الأفلام. (الحبيبات وتغميق الأطراف كانوا موجودين: «الحبيبات» و«الحواف».)'] },
     { v: '1.12.0', d: '2026-11-17', title: 'فلاتري المحفوظة', items: ['زر «⭐ احفظ هذا الفلتر» يحفظ توليفتك (الفلاتر وشدتها والتعديلات) باسم تختاره.', 'من «⭐ فلاتري» تطبقها على أي صورة أو فيديو بضغطة، أو تحذفها.'] },
     { v: '1.11.0', d: '2026-11-17', title: 'قبل / بعد', items: ['زر «↔ قبل / بعد» يظهر خط تسحبه فوق الصورة أو الفيديو: يسار الخط الأصل ويمينه المعدل.', 'اضغطه مرة ثانية للرجوع. والضغط المطوّل لرؤية الأصل يظل شغال بدونه.'] },
     { v: '1.10.2', priv: true, d: '2026-11-16', title: 'إصلاح تحميل اللوحة', items: ['اللوحة صارت تعرض الأرقام أول بأول ولا تعلق، وفيها زر إعادة المحاولة.'] },
@@ -588,7 +589,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     'varying vec2 v;uniform sampler2D t,t2;',
     'uniform vec3 uSlope[3],uPow[3],uSh[3],uHi[3];uniform vec4 uP[3];uniform vec3 uAmtL;',
     'uniform vec4 uFr;uniform vec3 uFr2;float inb;',
-    'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed;uniform vec2 uTex;',
+    'uniform float uAsp,uSharp,uMix,uBri,uCon2,uSat2,uVib,uTemp,uTint,uHiA,uShA,uFadeA,uVigA,uGrain,uGs,uSeed,uGlow,uBars;uniform vec2 uTex;',
     'float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}',
     'vec3 S(vec2 p){vec3 a=texture2D(t,p).rgb;if(uMix>0.){a=mix(a,texture2D(t2,p).rgb,uMix);}return a;}',
     'vec3 lk(vec3 o,vec3 sl,vec3 pw,vec3 sh,vec3 hi,vec4 p,float amt){',
@@ -610,9 +611,11 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     ' c=lk(c,uSlope[0],uPow[0],uSh[0],uHi[0],uP[0],uAmtL.x);',
     ' c=lk(c,uSlope[1],uPow[1],uSh[1],uHi[1],uP[1],uAmtL.y);',
     ' c=lk(c,uSlope[2],uPow[2],uSh[2],uHi[2],uP[2],uAmtL.z);',
+    ' if(uGlow>0.){vec3 g=vec3(0.);for(int i=0;i<8;i++){float a=float(i)*.785398;vec2 d=vec2(cos(a),sin(a))*uTex*16.;g+=S(su+d)+S(su+d*2.4);}g/=16.;c+=max(g-.5,0.)*uGlow*1.2;}',
     ' vec2 q=v-.5;q.x*=uAsp;c*=1.-uVigA*smoothstep(.25,.85,length(q));',
     ' float n=fract(sin(dot(floor(gl_FragCoord.xy/uGs)+uSeed,vec2(12.9898,78.233)))*43758.5453);',
     ' c+=(n-.5)*uGrain*.35;',
+    ' if(v.y<uBars||v.y>1.-uBars)c=vec3(0.);',
     ' gl_FragColor=vec4(clamp(c,0.,1.)*inb,1.);}'
   ].join('\n');
 
@@ -644,7 +647,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
     gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 't2'), 1);
     var U = {};
     ['uSlope', 'uPow', 'uSh', 'uHi', 'uP'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n + '[0]'); });
-    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uTex', 'uFr', 'uFr2'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+    ['uAmtL', 'uAsp', 'uSharp', 'uMix', 'uBri', 'uCon2', 'uSat2', 'uVib', 'uTemp', 'uTint', 'uHiA', 'uShA', 'uFadeA', 'uVigA', 'uGrain', 'uGs', 'uSeed', 'uGlow', 'uBars', 'uTex', 'uFr', 'uFr2'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
     this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
     var FR = { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }, wmOn = false, wmReady = false, wmTex, wmPr, wmU = {}, wmLoc;
     this.setFrame = function (f) { FR = f || { vx: 1, vy: 1, cx: .5, cy: .5, rot: 0, flip: 0, fit: 0 }; };
@@ -711,7 +714,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
       gl.uniform1f(U.uBri, ad.bri || 0); gl.uniform1f(U.uCon2, ad.con == null ? 1 : ad.con); gl.uniform1f(U.uSat2, ad.sat == null ? 1 : ad.sat);
       gl.uniform1f(U.uVib, ad.vib || 0); gl.uniform1f(U.uTemp, ad.temp || 0); gl.uniform1f(U.uTint, ad.tint || 0);
       gl.uniform1f(U.uHiA, ad.hi || 0); gl.uniform1f(U.uShA, ad.sh || 0); gl.uniform1f(U.uFadeA, ad.fade || 0);
-      gl.uniform1f(U.uVigA, ad.vig || 0); gl.uniform1f(U.uGrain, ad.grain || 0);
+      gl.uniform1f(U.uGlow, ad.glow || 0); gl.uniform1f(U.uBars, ad.bars || 0); gl.uniform1f(U.uVigA, ad.vig || 0); gl.uniform1f(U.uGrain, ad.grain || 0);
       gl.uniform1f(U.uGs, Math.max(1, w / 1280)); gl.uniform1f(U.uSeed, Math.random() * 100);
       gl.uniform4f(U.uFr, FR.vx, FR.vy, FR.cx, FR.cy); gl.uniform3f(U.uFr2, FR.rot, FR.flip, FR.fit);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -757,14 +760,14 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
   }
   function applyFrame() { var m = state.media; if (R && m) { R.setFrame(frameInfo(m).fr); R.setWm(state.wm && !state.showOrig); } }
   function fitPreview() { var m = state.media; if (!m) return; var fd = frameInfo(m); sizeCanvas(fd.w, fd.h, m.kind === 'video' ? 960 : 1280); }
-  var NOADJ = { bri: 0, con: 1, sat: 1, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
-  var adjRaw = { bri: 0, con: 0, sat: 0, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0 };
+  var NOADJ = { bri: 0, con: 1, sat: 1, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0, glow: 0, bars: 0 };
+  var adjRaw = { bri: 0, con: 0, sat: 0, vib: 0, temp: 0, tint: 0, hi: 0, sh: 0, fade: 0, vig: 0, grain: 0, glow: 0, bars: 0 };
   var adj = NOADJ;
   var trim = { a: 0, b: 1000 };
   function computeAdj() {
     var r = adjRaw;
     adj = { bri: r.bri / 100 * .9, con: 1 + r.con / 100 * .6, sat: 1 + r.sat / 100, vib: r.vib / 100 * 1.2, temp: r.temp / 100, tint: r.tint / 100,
-            hi: r.hi / 100, sh: r.sh / 100, fade: r.fade / 100 * .25, vig: r.vig / 100 * .8, grain: r.grain / 100 };
+            hi: r.hi / 100, sh: r.sh / 100, fade: r.fade / 100 * .25, vig: r.vig / 100 * .8, grain: r.grain / 100, glow: r.glow / 100, bars: r.bars / 100 * .14 };
   }
   function stackAmt() { return state.stack.map(function (x) { return { f: x.f, a: x.a * state.amount }; }); }
   function stackName() { return state.stack.length ? state.stack.map(function (x) { return x.f.id; }).join('+') : 'original'; }
@@ -885,7 +888,7 @@ header h1 img.logo { height: 76px; width: auto; mix-blend-mode: screen; flex: no
 
   /* ---------- image adjustments ---------- */
   var ADJ = [['bri', 'السطوع', -100], ['con', 'التباين', -100], ['sat', 'التشبع', -100], ['vib', 'الحيوية', -100], ['temp', 'الدفء', -100],
-             ['tint', 'الصبغة', -100], ['hi', 'الإضاءات', -100], ['sh', 'الظلال', -100], ['fade', 'مات', 0], ['vig', 'الحواف', -100], ['grain', 'الحبيبات', 0]];
+             ['tint', 'الصبغة', -100], ['hi', 'الإضاءات', -100], ['sh', 'الظلال', -100], ['fade', 'مات', 0], ['vig', 'الحواف', -100], ['grain', 'الحبيبات', 0], ['glow', 'توهج', 0], ['bars', 'شريط سينمائي', 0]];
   var adjInputs = [];
   function updateAdjCount() {
     var n = 0; for (var k in adjRaw) { if (adjRaw[k] !== 0) n++; }
