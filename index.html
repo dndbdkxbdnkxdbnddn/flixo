@@ -205,6 +205,27 @@ header { position: relative; }
 .adm-big div { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
 .adm-big b { display: block; font-size: 22px; color: var(--accent); direction: ltr; }
 .adm-big span { font-size: 12px; color: var(--muted); }
+
+.dx-top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}.dx-live{color:#3ddc84;font-weight:700}.dx-up{flex:1}
+.dx-btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;width:34px;height:34px;font-size:16px}
+.dx-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.dx-k{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px}
+.dx-k span{font-size:12px;color:var(--muted)}.dx-k b{font-size:28px;color:var(--accent);direction:ltr;text-align:right;line-height:1.1}.dx-k small{font-size:11px;color:var(--muted)}
+.dx-d{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}.dx-d.up{color:#3ddc84}.dx-d.dn{color:#ff7a7a}
+.dx-card{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+.dx-ch{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:14px;flex-wrap:wrap}.dx-leg{font-size:11px;color:var(--muted);flex:1}
+.dx-leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin:0 6px 0 2px}.dx-leg .b1,.dx-b1{background:var(--accent);fill:var(--accent)}.dx-leg .b2,.dx-b2{background:#3ddc84;fill:#3ddc84}
+.dx-rg{display:flex;gap:4px}.dx-r{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:3px 9px;font-size:12px}.dx-r.on{background:var(--accent);color:#000;border-color:transparent}
+.dx-svg{width:100%;height:auto;display:block}.dx-grid{stroke:var(--line);stroke-width:1}.dx-ax{font-size:9px;fill:var(--muted)}.dx-col{cursor:pointer}
+.dx-tip{font-size:12px;color:var(--muted);margin:6px 0 0;min-height:1em}.dx-empty{font-size:13px;color:var(--muted);margin:4px 0}
+.dx-row{display:grid;grid-template-columns:96px 1fr 70px;gap:8px;align-items:center;margin:6px 0;font-size:13px}.dx-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}.dx-bar b{display:block;height:100%;background:var(--accent);border-radius:5px}
+.dx-n{direction:ltr;text-align:left;font-weight:700}.dx-n small{color:var(--muted);font-weight:400}
+.dx-t{width:100%;border-collapse:collapse;font-size:13px;text-align:center}.dx-t td,.dx-t th{padding:6px 3px;border-top:1px solid var(--line)}.dx-t th{color:var(--muted);font-weight:400;border-top:0}
+.dx-hours{display:flex;align-items:flex-end;gap:2px;height:70px;direction:ltr}.dx-hours i{flex:1;background:var(--accent);border-radius:2px 2px 0 0;opacity:.85}
+.dx-hl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);direction:ltr;margin-top:3px}
+.dx-foot{font-size:12px;color:var(--muted);line-height:1.7}.dx-opt{display:block;font-size:13px;margin:8px 0}.dx-acts{display:flex;gap:8px}.dx-acts .btn{flex:1}
+:root[data-theme="light"] .dx-k,:root[data-theme="light"] .dx-card{background:rgba(43,29,18,.05)}:root[data-theme="light"] .dx-bar{background:rgba(43,29,18,.1)}
 .adm-h { margin: 16px 0 6px; font-size: 15px; }
 .adm-t { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
 .adm-t td, .adm-t th { padding: 6px 4px; border-top: 1px solid var(--line); }
@@ -669,6 +690,7 @@ document.addEventListener('DOMContentLoaded',function(){
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '2.1.0', d: '2026-11-19', title: 'لوحة أرقام دقيقة', items: ['لوحة مالك جديدة تقرأ من قاعدة بياناتك الخاصة (زوار، رفع، تصدير، مصادر، فلاتر).'], priv: true },
     { v: '2.0.2', d: '2026-11-19', title: 'إصلاح العد', items: ['إذا خدمة العد رفضت الطلب ما يحسبه نجاح، ويجرّب الخدمة الثانية.', 'زر اختبار العد بلوحة المالك.'], priv: true },
     { v: '2.0.1', d: '2026-11-19', title: 'تشخيص العدادات', items: ['تشخيص بلوحة المالك يبين ليش العدادات ما تشتغل.'], priv: true },
     { v: '2.0.0', d: '2026-11-19', title: 'FLIXO 2.0', items: ['تصميم جديد كلياً بروح سينمائية: شريط أدوات عايم تحت، كلاكيت للتصدير، وشريط فيلم للنتيجة.', 'أدوات جديدة: إزالة الخلفية، رفع الجودة (عادي وفائق)، قبل/بعد، فلاتري المحفوظة، LUT، سرعة الفيديو، وواجهة إنجليزية.', 'دقات أكثر للصورة (حتى 8K) ومستويات حدة أكثر.'] },
@@ -1372,7 +1394,7 @@ document.addEventListener('DOMContentLoaded',function(){
   $('file').addEventListener('change', function () {
     var inp = this, f = inp.files && inp.files[0];
     if (!f) { say('ما انختار ملف. جرّب مرة ثانية.', 'err'); return; }
-    if (window.FX) FX.t('upload');
+    if (window.FX) FX.t('upload', { kind: (f.type || '').indexOf('video') === 0 ? 'video' : 'photo' });
     state.pid = null; state.dirty = false;
     var nm = f.name || '', ty = f.type || ''; try { inp.value = ''; } catch (e) {}
     if (!ty) {
@@ -1533,7 +1555,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 
   function exportImage() {
-    if (window.FX) FX.t('export');
+    if (window.FX) { if (FX.done) FX.done({ kind: 'photo', filters: stackName(), res: opts.ires ? String(opts.ires) : 'auto' }); else FX.t('export'); }
     var m = state.media, sp = imgSpec(m), tries = [1, .75, .5, .35], ti = 0;
     function attempt() {
       var f = tries[ti], c = document.createElement('canvas'), RR;
@@ -1842,7 +1864,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   async function exportVideo() {
-    if (window.FX) FX.t('export');
+    if (window.FX) { if (FX.done) FX.done({ kind: 'video', filters: stackName(), res: opts.vres ? String(opts.vres) : 'auto' }); else FX.t('export'); }
     var m = state.media, v = m.el; applyFrame();
     try { if (await exportVideoFast()) return; } catch (e) { state.exporting = false; $('app').classList.remove('busy'); $('prog').hidden = true; $('exportBtn').disabled = false; }
     if (!R || !window.MediaRecorder || !cv.captureStream) { say('المتصفح ما يدعم تصدير الفيديو. استعمل كروم.', 'err'); return; }
@@ -2411,6 +2433,7 @@ document.addEventListener('DOMContentLoaded',function(){
     function blobOf(c, type, q) { return new Promise(function (res, rej) { try { c.toBlob(function (b) { b ? res(b) : rej(new Error('الصورة كبيرة على ذاكرة الجوال (ما قدر يحفظ الناتج)')); }, type || 'image/jpeg', q || .92); } catch (e) { rej(new Error('الصورة كبيرة على ذاكرة الجوال')); } }); }
     function remember() { if (!orig) orig = state.curFile ? state.curFile : { canvas: toCanvas() }; }
     function show(c, name, msg) {
+      try { if (window.FX && FX.t) FX.t('tool', { x: /hd\.jpg/.test(name) ? 'up-normal' : /ultra/.test(name) ? 'up-ultra' : /-ai-x/.test(name) ? 'up-ai' : /bg/.test(name) ? 'bg-fast' : 'tool' }); } catch (e) {}
       return blobOf(c, 'image/jpeg', .92).then(function (b) {
         var f = new File([b], name, { type: 'image/jpeg' }); f.__tool = true;
         return new Promise(function (res, rej) {
@@ -2873,7 +2896,174 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('admClose').onclick = function () { adm.hidden = true; };
     adm.addEventListener('click', function (e) { if (e.target === adm) adm.hidden = true; });
     document.getElementById('admOut').onclick = function () { try { localStorage.removeItem('flixo_owner'); } catch (e) {} adm.hidden = true; };
+    window.__fxOld = true;
   })();
+
+  /* ---------- analytics v2: own backend (Google Sheet via Apps Script) + pro dashboard ---------- */
+  (function () {
+    var BACKEND = '';                       /* ← the Apps Script web-app URL goes here */
+    var HASH = 'f4350b96fcfad66c3fc95dbbabf522ec439d30564304c560d2bc46473b12991e';
+    function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+    function base() { return BACKEND || ls('flixo_backend') || ''; }
+    var $ = function (i) { return document.getElementById(i); };
+    var live = /^https?:$/.test(location.protocol);
+    function day() { return new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); }
+    function devId() { var d = ls('fx_id'); if (!d) { d = Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-5); ls('fx_id', d); } return d; }
+    function srcOf() {
+      var ua = navigator.userAgent || '', ref = ''; try { ref = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+      var q = location.search.toLowerCase();
+      if (/ttclid|utm_source=tiktok/.test(q) || /tiktok|musical_ly|bytedance/i.test(ua) || /tiktok/.test(ref)) return 'tiktok';
+      if (/fbclid|utm_source=(facebook|fb)/.test(q) || /facebook|fb\.com|fban|fbav/i.test(ua + ref)) return 'facebook';
+      if (/instagram/i.test(ua + ref) || /utm_source=instagram/.test(q)) return 'instagram';
+      if (/telegram/i.test(ua) || /(^|\.)t\.me$|telegram/.test(ref) || /utm_source=telegram/.test(q)) return 'telegram';
+      if (/whatsapp/i.test(ua + ref) || /utm_source=whatsapp/.test(q)) return 'whatsapp';
+      if (/snapchat/i.test(ua + ref)) return 'snapchat';
+      if (/(^|\.)(twitter|x)\.com$|t\.co$/.test(ref)) return 'twitter';
+      if (/google\./.test(ref)) return 'google';
+      if (!ref || ref === location.hostname) return 'direct';
+      return 'other';
+    }
+    function devClass() { var ua = navigator.userAgent || ''; return /android/i.test(ua) ? 'android' : /iphone|ipad|ipod/i.test(ua) ? 'ios' : 'pc'; }
+    function ver() { try { return CHANGELOG[0].v; } catch (e) { return ''; } }
+    function q(params) { var o = []; for (var k in params) if (params[k] != null && params[k] !== '') o.push(k + '=' + encodeURIComponent(params[k])); return o.join('&'); }
+    /* send queue so a hit is not lost if the network drops */
+    function getQ() { try { return JSON.parse(ls('fx_q') || '[]'); } catch (e) { return []; } }
+    function setQ(a) { ls('fx_q', JSON.stringify(a.slice(-40))); }
+    function post(u, done) {
+      try { fetch(u, { mode: 'no-cors', keepalive: true, cache: 'no-store' }).then(function () { done(true); }, function () { done(false); }); }
+      catch (e) { var im = new Image(); im.onload = im.onerror = function () { done(true); }; im.src = u; }
+    }
+    function send(u) { var a = getQ(); a.push(u); setQ(a); flush(); }
+    var flushing = false;
+    function flush() {
+      if (flushing || !base()) return; var a = getQ(); if (!a.length) return; flushing = true;
+      (function next(i) {
+        if (i >= a.length) { flushing = false; return; }
+        post(a[i], function (ok) {
+          if (!ok) { flushing = false; return; }
+          var cur = getQ(); var ix = cur.indexOf(a[i]); if (ix >= 0) cur.splice(ix, 1); setQ(cur); next(i + 1);
+        });
+      })(0);
+    }
+    function track(type, x) {
+      if (!live || !base()) return;
+      if (ls('flixo_owner') && ls('flixo_cnt') !== '1' && !(x && x.force)) return;
+      x = x || {};
+      send(base() + '?' + q({ a: 'h', t: type, d: devId(), v: ver(), s: x.s || (ls('fx_src') || 'direct'), m: x.kind, f: x.filters, r: x.res, g: devClass(), l: document.documentElement.getAttribute('lang') || 'ar', x: x.x }));
+    }
+    if (base() && live) {
+      var old = window.FX || {};
+      window.FX = {
+        t: function (ev, data) {
+          if (ev === 'upload') track('upload', { kind: data && data.kind });
+          else if (ev === 'tool') track('tool', { x: data && data.x });
+        },
+        done: function (data) { track('export', data); }
+      };
+      var s0 = srcOf(); if (!ls('fx_src') || s0 !== 'direct') ls('fx_src', s0);
+      if (ls('fx_vd') !== day()) { ls('fx_vd', day()); track('visit', { s: ls('fx_src') }); }
+      flush();
+    }
+
+    /* ---------------- dashboard ---------------- */
+    var adm = $('adm'), body = $('admBody'), range = 14, cache = null, tId = 0;
+    function sha(t) { return crypto.subtle.digest('SHA-256', new TextEncoder().encode('flixo|' + t)).then(function (b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }); }
+    function n0(n) { return (n == null || isNaN(n)) ? '؟' : Number(n).toLocaleString('en-US'); }
+    var SRC = { tiktok: 'تيك توك', telegram: 'تلجرام', whatsapp: 'واتساب', instagram: 'انستغرام', facebook: 'فيسبوك', snapchat: 'سناب', twitter: 'X / تويتر', google: 'غوغل', direct: 'مباشر', other: 'أخرى' };
+    var DEV = { android: 'أندرويد', ios: 'آيفون', pc: 'كمبيوتر' };
+    var TOOL = { 'bg-fast': '✂️ إزالة الخلفية', 'bg-ai': '🤖 قص أدق', 'up-normal': '🔍 جودة عادي', 'up-ultra': '🔍 جودة فائق', 'up-ai': '🤖 جودة ذكاء اصطناعي' };
+    function delta(a, b) {
+      if (!b) return a ? '<i class="dx-d up">جديد</i>' : '<i class="dx-d">—</i>';
+      var p = Math.round((a - b) / b * 100);
+      return '<i class="dx-d ' + (p > 0 ? 'up' : p < 0 ? 'dn' : '') + '">' + (p > 0 ? '▲ ' : p < 0 ? '▼ ' : '') + Math.abs(p) + '%</i>';
+    }
+    function sum(arr, k) { return arr.reduce(function (s, x) { return s + (x[k] || 0); }, 0); }
+    function bars(list, fmt, total) {
+      if (!list || !list.length) return '<p class="dx-empty">ما في بيانات بعد</p>';
+      var mx = list[0][1] || 1, tt = total || list.reduce(function (s, x) { return s + x[1]; }, 0) || 1;
+      return list.map(function (r) { return '<div class="dx-row"><span class="dx-l">' + fmt(r[0]) + '</span><span class="dx-bar"><b style="width:' + Math.max(3, Math.round(r[1] / mx * 100)) + '%"></b></span><span class="dx-n">' + n0(r[1]) + ' <small>' + Math.round(r[1] / tt * 100) + '%</small></span></div>'; }).join('');
+    }
+    function chart(series) {
+      var W = 340, H = 150, pad = 18, n = series.length, gw = (W - pad * 2) / n, mx = 1;
+      series.forEach(function (s) { mx = Math.max(mx, s.visits, s.exports); });
+      var svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" class="dx-svg" role="img" aria-label="chart">';
+      [0, .5, 1].forEach(function (g) { var y = pad + (H - pad * 2) * (1 - g); svg += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y + '" y2="' + y + '" class="dx-grid"/><text x="14" y="' + (y + 3) + '" text-anchor="end" class="dx-ax">' + Math.round(mx * g) + '</text>'; });
+      series.forEach(function (s, i) {
+        var x = pad + i * gw, bw = Math.max(3, gw * .34), h1 = (H - pad * 2) * s.visits / mx, h2 = (H - pad * 2) * s.exports / mx, base = H - pad;
+        svg += '<g class="dx-col" data-i="' + i + '"><rect x="' + x + '" y="0" width="' + gw + '" height="' + (H + 22) + '" fill="transparent"/>' +
+          '<rect x="' + (x + gw * .12) + '" y="' + (base - h1) + '" width="' + bw + '" height="' + Math.max(0, h1) + '" rx="2" class="dx-b1"/>' +
+          '<rect x="' + (x + gw * .12 + bw + 2) + '" y="' + (base - h2) + '" width="' + bw + '" height="' + Math.max(0, h2) + '" rx="2" class="dx-b2"/>' +
+          ((n <= 14 || i % 3 === 0) ? '<text x="' + (x + gw / 2) + '" y="' + (H + 8) + '" text-anchor="middle" class="dx-ax">' + s.day.slice(8) + '</text>' : '') + '</g>';
+      });
+      return svg + '</svg>';
+    }
+    function render(j) {
+      var S = j.series, t = S[S.length - 1], y = S[S.length - 2] || { visits: 0, uploads: 0, exports: 0, exporters: 0, active: 0 };
+      var w = S.slice(-7), w0 = S.slice(-14, -7);
+      var conv = t.visits ? Math.round(t.exporters / t.visits * 100) : 0, convY = y.visits ? Math.round(y.exporters / y.visits * 100) : 0;
+      var wv = sum(w, 'visits'), wa = sum(w, 'active'), we = sum(w, 'exporters');
+      var h = '<div class="dx-top"><span class="dx-live">● مباشر · قاعدتك</span><span class="dx-up">آخر تحديث ' + new Date(j.generated).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</span><button class="dx-btn" id="dxRef" type="button" aria-label="تحديث">↻</button></div>';
+      h += '<div class="dx-kpis">' +
+        '<div class="dx-k"><span>زوار اليوم</span><b>' + n0(t.visits) + '</b>' + delta(t.visits, y.visits) + '<small>أمس ' + n0(y.visits) + '</small></div>' +
+        '<div class="dx-k"><span>رفعوا ملف</span><b>' + n0(t.uploads) + '</b>' + delta(t.uploads, y.uploads) + '<small>أمس ' + n0(y.uploads) + '</small></div>' +
+        '<div class="dx-k"><span>تصديرات اليوم</span><b>' + n0(t.exports) + '</b>' + delta(t.exports, y.exports) + '<small>أمس ' + n0(y.exports) + '</small></div>' +
+        '<div class="dx-k"><span>نسبة التصدير</span><b>' + conv + '%</b>' + delta(conv, convY) + '<small>صدّروا ÷ زوار</small></div></div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>آخر ' + S.length + ' يوم</b><span class="dx-leg"><i class="b1"></i>زوار <i class="b2"></i>تصدير</span><span class="dx-rg">' +
+        [7, 14, 30].map(function (d) { return '<button type="button" class="dx-r' + (d === range ? ' on' : '') + '" data-r="' + d + '">' + d + '</button>'; }).join('') + '</span></div>' + chart(S) + '<p class="dx-tip" id="dxTip">المس عمود لتشوف تفاصيل اليوم</p></div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>القمع (آخر 7 أيام)</b></div>' +
+        bars([['زاروا الموقع', wv], ['استعملوا (رفع أو أداة)', wa], ['صدّروا', we]], function (x) { return x; }, wv) + '</div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>مقارنة</b></div><table class="dx-t"><tr><th></th><th>اليوم</th><th>أمس</th><th>7 أيام</th><th>قبلها</th></tr>' +
+        [['زوار', 'visits'], ['رفع', 'uploads'], ['تصدير', 'exports'], ['أدوات', 'tools'], ['أجهزة جديدة', 'newDev']].map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + n0(t[r[1]]) + '</td><td>' + n0(y[r[1]]) + '</td><td>' + n0(sum(w, r[1])) + '</td><td>' + n0(sum(w0, r[1])) + '</td></tr>'; }).join('') + '</table></div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>من وين جاو (آخر ' + S.length + ' يوم)</b></div>' + bars(j.sources, function (k) { return SRC[k] || k; }) + '</div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>الأجهزة</b></div>' + bars(j.devices, function (k) { return DEV[k] || k; }) + '</div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>أكثر الفلاتر تصديراً (7 أيام)</b></div>' + bars(j.filters, function (k) { return k; }) +
+        '<p class="dx-tip">صور ' + n0(j.kinds.photo) + ' · فيديو ' + n0(j.kinds.video) + '</p></div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>الأدوات المستعملة</b></div>' + bars(j.tools, function (k) { return TOOL[k] || k; }) + '</div>';
+      var hm = j.hours, hx = Math.max.apply(null, hm) || 1;
+      h += '<div class="dx-card"><div class="dx-ch"><b>وقت الذروة (توقيت العراق)</b></div><div class="dx-hours">' + hm.map(function (v, i) { return '<i style="height:' + Math.max(4, Math.round(v / hx * 100)) + '%" title="' + i + ':00 — ' + v + '"></i>'; }).join('') + '</div><div class="dx-hl"><span>0</span><span>6</span><span>12</span><span>18</span><span>23</span></div></div>';
+      h += '<div class="dx-card"><div class="dx-ch"><b>الجدول اليومي</b></div><table class="dx-t"><tr><th>اليوم</th><th>زوار</th><th>رفع</th><th>تصدير</th><th>أجهزة جديدة</th></tr>' +
+        S.slice(-10).reverse().map(function (s) { return '<tr><td dir="ltr">' + s.day.slice(5) + '</td><td>' + n0(s.visits) + '</td><td>' + n0(s.uploads) + '</td><td>' + n0(s.exports) + '</td><td>' + n0(s.newDev) + '</td></tr>'; }).join('') + '</table></div>';
+      h += '<p class="dx-foot">كل الأجهزة من البداية: <b>' + n0(j.totalDevices) + '</b> · كل الأحداث: ' + n0(j.total.events) + '<br>الرقم = أجهزة (مو أشخاص). الزائر يُحسب مرة باليوم. جهازك مستثنى من العدّ.</p>' +
+        '<label class="dx-opt"><input type="checkbox" id="dxCnt"' + (ls('flixo_cnt') === '1' ? ' checked' : '') + '> احسب جهازي بالعدّ (للتجربة)</label>' +
+        '<div class="dx-acts"><button class="btn" id="dxTest" type="button">أرسل حدث تجريبي</button><button class="btn" id="dxCsv" type="button">⬇ نسخ CSV</button></div><p class="dx-tip" id="dxOut"></p>';
+      body.innerHTML = h;
+      $('dxRef').onclick = function () { load(true); };
+      Array.prototype.forEach.call(body.querySelectorAll('.dx-r'), function (b) { b.onclick = function () { range = +b.getAttribute('data-r'); load(false); }; });
+      Array.prototype.forEach.call(body.querySelectorAll('.dx-col'), function (g) { g.onclick = function () { var s = S[+g.getAttribute('data-i')]; $('dxTip').textContent = s.day + ' · زوار ' + s.visits + ' · رفع ' + s.uploads + ' · تصدير ' + s.exports + ' (صور ' + s.photoEx + '، فيديو ' + s.videoEx + ') · أجهزة جديدة ' + s.newDev; }; });
+      $('dxCnt').onchange = function () { ls('flixo_cnt', this.checked ? '1' : null); };
+      $('dxTest').onclick = function () { $('dxOut').textContent = 'جاري الإرسال…'; var u = base() + '?' + q({ a: 'h', t: 'tool', d: 'test-' + devId(), v: ver(), s: 'direct', g: devClass(), x: 'test' }); post(u, function (ok) { $('dxOut').textContent = ok ? 'انرسل. اضغط ↻ بعد ثواني، وتلكى «أدوات» زادت.' : 'ما وصل للشبكة.'; }); };
+      $('dxCsv').onclick = function () { var c = 'day,visits,uploads,exports,tools,new\n' + S.map(function (s) { return [s.day, s.visits, s.uploads, s.exports, s.tools, s.newDev].join(','); }).join('\n'); try { navigator.clipboard.writeText(c); $('dxOut').textContent = 'اننسخ.'; } catch (e) { $('dxOut').textContent = c; } };
+    }
+    function msg(t, retry) { body.innerHTML = '<p class="sub">' + t + '</p>' + (retry ? '<button class="btn" id="dxRetry" type="button" style="width:100%">إعادة المحاولة</button>' : ''); var r = $('dxRetry'); if (r) r.onclick = function () { load(true); }; }
+    function setup() {
+      body.innerHTML = '<p class="sub">لوحة الأرقام الدقيقة تحتاج ربط قاعدة البيانات (مرة وحدة). الصق رابط Apps Script هنا:</p><input id="dxUrl" class="adm-pin" style="letter-spacing:0;font-size:14px" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec"><button class="btn" id="dxSave" type="button" style="width:100%;margin-top:8px">ربط</button><p class="dx-tip" id="dxErr"></p>';
+      $('dxSave').onclick = function () { var u = $('dxUrl').value.trim(); if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)) { $('dxErr').textContent = 'الرابط لازم ينتهي بـ /exec'; return; } ls('flixo_backend', u); load(true); };
+    }
+    function load(fresh) {
+      if (!base()) return setup();
+      var k = ls('flixo_k'); if (!k) return login();
+      var my = ++tId; msg('جاري التحميل…');
+      var c = new AbortController(), to = setTimeout(function () { c.abort(); }, 20000);
+      fetch(base() + '?' + q({ a: 's', k: k, days: range, fresh: fresh ? 1 : '' }), { cache: 'no-store', signal: c.signal }).then(function (r) { clearTimeout(to); return r.json(); }).then(function (j) {
+        if (my !== tId) return;
+        if (!j || !j.ok) { if (j && j.error === 'key') { ls('flixo_k', null); return login(); } return msg('رد غير متوقع من القاعدة: ' + ((j && j.error) || '—'), true); }
+        cache = j; render(j);
+      }).catch(function (e) { clearTimeout(to); if (my === tId) msg('ما كدرت أوصل لقاعدة البيانات (' + (e && e.name === 'AbortError' ? 'انتهى الوقت' : 'الشبكة أو رابط غلط') + ').', true); });
+    }
+    function login() {
+      body.innerHTML = '<p class="sub">اكتب الرمز</p><input id="admPin" class="adm-pin" type="password" inputmode="numeric" autocomplete="off" dir="ltr"><button class="btn" id="admGo" type="button">فتح</button><p class="sub" id="admErr" style="color:#ff8a8a;margin-top:8px"></p>';
+      var go = function () { var pin = $('admPin').value.trim(); sha(pin).then(function (x) { if (x === HASH) { ls('flixo_owner', x); ls('flixo_k', pin); load(true); } else $('admErr').textContent = 'الرمز غلط'; }); };
+      $('admGo').onclick = go; $('admPin').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+    }
+    if (BACKEND || ls('flixo_backend')) {
+      $('lockBtn').onclick = function () { adm.hidden = false; if (ls('flixo_owner') === HASH) load(false); else login(); };
+    } else if (window.__fxOld) {
+      /* no backend yet: keep the old free-counter dashboard, but offer the link-up form */
+      var oldClick = $('lockBtn').onclick;
+      $('lockBtn').onclick = function () { oldClick(); setTimeout(function () { if (!$('dxLink') && ls('flixo_owner') === HASH && body) { var b = document.createElement('button'); b.className = 'btn'; b.id = 'dxLink'; b.type = 'button'; b.style.cssText = 'width:100%;margin-top:8px'; b.textContent = '🔗 ربط قاعدة البيانات الدقيقة'; b.onclick = setup; body.appendChild(b); } }, 400); };
+    }
+  })();
+
 
   /* ---------- language (ar / en) ---------- */
   (function () {
