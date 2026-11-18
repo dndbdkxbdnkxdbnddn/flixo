@@ -669,6 +669,7 @@ document.addEventListener('DOMContentLoaded',function(){
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '2.0.2', d: '2026-11-19', title: 'إصلاح العد', items: ['إذا خدمة العد رفضت الطلب ما يحسبه نجاح، ويجرّب الخدمة الثانية.', 'زر اختبار العد بلوحة المالك.'], priv: true },
     { v: '2.0.1', d: '2026-11-19', title: 'تشخيص العدادات', items: ['تشخيص بلوحة المالك يبين ليش العدادات ما تشتغل.'], priv: true },
     { v: '2.0.0', d: '2026-11-19', title: 'FLIXO 2.0', items: ['تصميم جديد كلياً بروح سينمائية: شريط أدوات عايم تحت، كلاكيت للتصدير، وشريط فيلم للنتيجة.', 'أدوات جديدة: إزالة الخلفية، رفع الجودة (عادي وفائق)، قبل/بعد، فلاتري المحفوظة، LUT، سرعة الفيديو، وواجهة إنجليزية.', 'دقات أكثر للصورة (حتى 8K) ومستويات حدة أكثر.'] },
     { v: '1.20.1', d: '2026-11-19', title: 'إصلاح رجوع للأصل', items: ['زر «↩ رجوع للأصل» صار يرجّع صورتك الأصلية دائماً، حتى بعد ما ترفع صورة جديدة.'] },
@@ -2767,11 +2768,11 @@ document.addEventListener('DOMContentLoaded',function(){
     ];
     function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
     function day(off) { return new Date(Date.now() + 3 * 3600e3 - (off || 0) * 864e5).toISOString().slice(0, 10); }
-    function req(url) {
+    function req(url, isGet) {
       var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 8000);
       return fetch(url, { cache: 'no-store', signal: c.signal }).then(function (r) {
         clearTimeout(t);
-        if (r.status === 404 || r.status === 400) return 0;
+        if (isGet && (r.status === 404 || r.status === 400)) return 0;
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json().then(function (j) {
           var n = j && (j.value != null ? j.value : (j.count != null ? j.count : (j.data && j.data.up_count)));
@@ -2784,7 +2785,7 @@ document.addEventListener('DOMContentLoaded',function(){
       return (function next() {
         if (i >= SV.length) return Promise.reject(0);
         var idx = i++;
-        return req(SV[idx][kind](key)).then(function (v) { diag[idx] = 'يشتغل'; return v; }, function (e) { diag[idx] = (e && e.message) || 'فشل'; return next(); });
+        return req(SV[idx][kind](key), kind === 'get').then(function (v) { diag[idx] = 'يشتغل'; return v; }, function (e) { diag[idx] = (e && e.message) || 'فشل'; return next(); });
       })();
     }
     var diag = {};
@@ -2829,9 +2830,16 @@ document.addEventListener('DOMContentLoaded',function(){
         days.forEach(function (d) { h += '<tr><td dir="ltr">' + d + '</td><td>' + fmt(m['v-' + d]) + '</td><td>' + fmt(m['a-' + d]) + '</td><td>' + fmt(m['x-' + d]) + '</td></tr>'; });
         h += '</table><p class="sub">' + (fin < keys.length ? 'جاري التحميل… (' + fin + '/' + keys.length + ')' : (got ? 'الرقم = عدد الأجهزة (مو أشخاص). "تفاعل" = رفع ملف أو تصدير. "تصدير" = أجهزة صدّرت (مرة وحدة لكل جهاز باليوم). "؟" = ما انقرأ.' : '⚠️ تعذر الاتصال بخدمة العد.')) + '</p>';
         if (fin >= keys.length && got === 0) h += '<p class="sub" dir="rtl">التشخيص: abacus ← ' + (diag[0] || '—') + ' · counterapi ← ' + (diag[1] || '—') + '</p>';
+        if (fin >= keys.length) h += '<button class="btn" id="admTest" type="button" style="width:100%;margin-top:8px">اختبر العدّ الآن</button><p class="sub" id="admTestOut" dir="rtl"></p>';
         if (fin >= keys.length && got < keys.length) h += '<button class="btn" id="admRetry" type="button" style="width:100%;margin-top:8px">إعادة المحاولة</button>';
         body.innerHTML = h;
         var rb = document.getElementById('admRetry'); if (rb) rb.onclick = dash;
+        var tb = document.getElementById('admTest'); if (tb) tb.onclick = function () {
+          var out = document.getElementById('admTestOut'); out.textContent = 'جاري الاختبار…'; var lines = [];
+          Promise.all(SV.map(function (sv, i) {
+            return fetch(sv.hit('test'), { cache: 'no-store' }).then(function (r) { return r.text().then(function (t) { lines[i] = (i ? 'counterapi' : 'abacus') + ': HTTP ' + r.status + ' ' + t.slice(0, 60); }); }, function () { lines[i] = (i ? 'counterapi' : 'abacus') + ': ما وصل للشبكة'; });
+          })).then(function () { out.textContent = lines.join(' | '); });
+        };
       }
       var q = keys.slice(), running = 0;
       function pump() {
