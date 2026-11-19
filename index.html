@@ -690,6 +690,7 @@ document.addEventListener('DOMContentLoaded',function(){
   } catch (e) {}
   /* CHANGELOG: newest first. Entries with priv:true (owner-only changes) bump the version but are hidden from the public top bar and what's-new list. To release: add an entry on top (the version label and the top bar follow it). */
   var CHANGELOG = [
+    { v: '2.1.1', d: '2026-11-19', title: 'ربط قاعدة الأرقام', items: ['ربط لوحة المالك بقاعدة البيانات الخاصة.'], priv: true },
     { v: '2.1.0', d: '2026-11-19', title: 'لوحة أرقام دقيقة', items: ['لوحة مالك جديدة تقرأ من قاعدة بياناتك الخاصة (زوار، رفع، تصدير، مصادر، فلاتر).'], priv: true },
     { v: '2.0.2', d: '2026-11-19', title: 'إصلاح العد', items: ['إذا خدمة العد رفضت الطلب ما يحسبه نجاح، ويجرّب الخدمة الثانية.', 'زر اختبار العد بلوحة المالك.'], priv: true },
     { v: '2.0.1', d: '2026-11-19', title: 'تشخيص العدادات', items: ['تشخيص بلوحة المالك يبين ليش العدادات ما تشتغل.'], priv: true },
@@ -2901,7 +2902,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   /* ---------- analytics v2: own backend (Google Sheet via Apps Script) + pro dashboard ---------- */
   (function () {
-    var BACKEND = '';                       /* ← the Apps Script web-app URL goes here */
+    var BACKEND = 'https://script.google.com/macros/s/AKfycbzktcBfmj8ZGyfWB_p_Pq-q5vSBGsd7UXtUqcs_0sPoniuBPNNj06UHDidyeaGxSZY/exec';                       /* ← the Apps Script web-app URL goes here */
     var HASH = 'f4350b96fcfad66c3fc95dbbabf522ec439d30564304c560d2bc46473b12991e';
     function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
     function base() { return BACKEND || ls('flixo_backend') || ''; }
