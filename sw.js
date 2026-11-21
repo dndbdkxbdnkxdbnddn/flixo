@@ -8,7 +8,7 @@ self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim(
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  if (/version\.json/.test(req.url)) return;            /* always straight to the network */
+  if (/version\.json|\.mp4/.test(req.url)) return;            /* always straight to the network */
   e.respondWith(
     fetch(req, { cache: 'no-cache' }).then(function (res) {
       if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
