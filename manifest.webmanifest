@@ -1,7 +1,7 @@
 {
   "name": "FLIXO",
   "short_name": "FLIXO",
-  "description": "فلاتر سينمائية للصور والفيديو، تشتغل على جهازك",
+  "description": "فلاتر سينمائية للصور، تشتغل على جهازك",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
